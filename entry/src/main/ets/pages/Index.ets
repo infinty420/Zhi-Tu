@@ -7,6 +7,8 @@ import { common } from '@kit.AbilityKit';
 import { AppContextHolder } from '../utils/AppContext';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { MindMapStore } from '../services/MindMapStore';
+import { MasteryPredictor } from '../services/MasteryPredictor';
+import { NodeType } from '../model/Constants';
 import { AccountService } from '../services/AccountService';
 import { CloudService } from '../services/CloudService';
 import { ClassService } from '../services/ClassService';
@@ -43,10 +45,35 @@ struct Index {
     CloudService.getInstance().init();
     ClassService.getInstance().init();
     DeepLinkRouter.attach(this.pathStack);
+    this.consumeLaunchIntent();
   }
 
   aboutToDisappear(): void {
     DeepLinkRouter.detach();
+  }
+
+  /** 消费启动意图：深链 / 卡片 router 事件 → 经 DeepLinkRouter 进入对应节点或复习 */
+  private consumeLaunchIntent(): void {
+    const store = MindMapStore.getInstance();
+    const snap = store.currentSnapshot();
+    if (!snap) {
+      return;
+    }
+    const nodeId = AppStorage.get<string>('launchNodeId') ?? '';
+    const action = AppStorage.get<string>('launchAction') ?? '';
+    let targetId = nodeId;
+    if (targetId.length === 0 && action === 'review') {
+      const now = Date.now();
+      const due = store.dueReviewNodes().slice().sort((a, b) => MasteryPredictor.priority(b, now) - MasteryPredictor.priority(a, now));
+      if (due.length > 0) {
+        targetId = due[0].id;
+      }
+    }
+    if (targetId.length > 0) {
+      const node = snap.findNode(targetId);
+      const type = node ? node.type : NodeType.GENERAL;
+      DeepLinkRouter.route(targetId, type, '');
+    }
   }
 
   @Builder

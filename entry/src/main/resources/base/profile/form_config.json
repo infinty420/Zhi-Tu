@@ -1,0 +1,20 @@
+{
+  "forms": [
+    {
+      "name": "zhitu_review_widget",
+      "description": "智图复习卡片",
+      "src": "./ets/form/FormCard.ets",
+      "uiSyntax": "arkts",
+      "isDefault": true,
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDynamic": true,
+      "updateEnabled": false,
+      "defaultDimension": "2*2",
+      "supportDimensions": ["2*2", "2*4"]
+    }
+  ]
+}
