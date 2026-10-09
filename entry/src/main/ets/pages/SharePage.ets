@@ -42,46 +42,52 @@ export struct SharePage {
 
   build() {
     NavDestination() {
-      Column({ space: 16 }) {
-        if (this.title.length === 0) {
-          Text('当前没有可导出的导图，先去首页生成一张吧')
-            .fontSize(14)
-            .fontColor('#8a94a6')
-            .width('100%')
-            .textAlign(TextAlign.Center)
-        } else {
-          Text(`分享《${this.title}》`)
-            .fontSize(18)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#1a2333')
-            .width('100%')
-            .textAlign(TextAlign.Center)
-          QRCode(this.link)
-            .width(200)
-            .height(200)
-            .margin(8)
-          Text(this.link)
-            .fontSize(12)
-            .fontColor('#8a94a6')
-            .width('100%')
-            .textAlign(TextAlign.Center)
-            .copyOption(CopyOptions.InApp)
-          Text('长按上方链接即可复制')
-            .fontSize(12)
-            .fontColor('#8a94a6')
-            .width('100%')
-            .textAlign(TextAlign.Center)
-          Button(this.sharing ? '分享中…' : '分享到精品市场')
-            .width('100%')
-            .height(40)
-            .backgroundColor('#13c2c2')
-            .enabled(!this.sharing)
-            .onClick(() => {
-              this.doShareToMarket();
-            })
+      Scroll() {
+        Column({ space: 16 }) {
+          if (this.title.length === 0) {
+            Text('当前没有可导出的导图，先去首页生成一张吧')
+              .fontSize(14)
+              .fontColor('#8a94a6')
+              .width('100%')
+              .textAlign(TextAlign.Center)
+          } else {
+            Text(`分享《${this.title}》`)
+              .fontSize(18)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+              .width('100%')
+              .textAlign(TextAlign.Center)
+            QRCode(this.link)
+              .width(200)
+              .height(200)
+              .margin(8)
+            Text(this.link)
+              .fontSize(12)
+              .fontColor('#8a94a6')
+              .width('100%')
+              .textAlign(TextAlign.Center)
+              .copyOption(CopyOptions.InApp)
+            Text('长按上方链接即可复制')
+              .fontSize(12)
+              .fontColor('#8a94a6')
+              .width('100%')
+              .textAlign(TextAlign.Center)
+            Button(this.sharing ? '分享中…' : '分享到精品市场')
+              .width('100%')
+              .height(40)
+              .backgroundColor('#13c2c2')
+              .enabled(!this.sharing)
+              .onClick(() => {
+                this.doShareToMarket();
+              })
+          }
         }
+        .padding(16)
+        .width('100%')
       }
-      .padding(16)
+      .align(Alignment.Top)
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
       .width('100%')
       .height('100%')
     }

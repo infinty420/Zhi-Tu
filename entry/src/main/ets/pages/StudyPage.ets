@@ -197,38 +197,44 @@ export struct StudyPage {
 
   build() {
     NavDestination() {
-      Column() {
-        // 顶部栏
-        Row({ space: 8 }) {
-          Button($r('app.string.nav_back'))
-            .height(32)
-            .fontSize(14)
-            .backgroundColor('#1677ff')
-            .onClick(() => {
-              DeepLinkRouter.pop();
-            })
-          Text($r('app.string.study_title'))
-            .fontSize(17)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#1a2333')
-          Blank()
+      Scroll() {
+        Column() {
+          // 顶部栏
+          Row({ space: 8 }) {
+            Button($r('app.string.nav_back'))
+              .height(32)
+              .fontSize(14)
+              .backgroundColor('#1677ff')
+              .onClick(() => {
+                DeepLinkRouter.pop();
+              })
+            Text($r('app.string.study_title'))
+              .fontSize(17)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+            Blank()
+            if (this.phase === 'study') {
+              Text(this.progressText)
+                .fontSize(13)
+                .fontColor('#8a94a6')
+            }
+          }
+          .padding(12)
+          .width('100%')
+
           if (this.phase === 'study') {
-            Text(this.progressText)
-              .fontSize(13)
-              .fontColor('#8a94a6')
+            this.studyBody()
+          } else if (this.phase === 'quiz') {
+            this.quizBody()
+          } else {
+            this.quizDoneBody()
           }
         }
-        .padding(12)
         .width('100%')
-
-        if (this.phase === 'study') {
-          this.studyBody()
-        } else if (this.phase === 'quiz') {
-          this.quizBody()
-        } else {
-          this.quizDoneBody()
-        }
       }
+      .align(Alignment.Top)
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
       .width('100%')
       .height('100%')
     }
