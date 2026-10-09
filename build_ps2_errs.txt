@@ -1,0 +1,4 @@
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: C:/Users/infinty/DevEcoSt
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: C:/Users/infinty/DevEcoSt
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: C:/Users/infinty/DevEcoSt
+Error Message: Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-lite

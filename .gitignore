@@ -1,0 +1,27 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+
+# 本地构建日志与临时分析产物
+*.log
+build_*.txt
+zoom_*.png
+nul
+
+# IDE / 本地工具数据
+/.codeartsdoer
+/.merkle-snapshot.json
+/.workbuddy
+
+# AI 配置：rawfile/ai_config.json 随仓库一起提交（便于直接运行）；
+# apiKey 为空时应用自动回退到 Mock 模式，需要真实模型时自行填入。
+# 若不想公开自己的密钥，可在此处加一行忽略该文件。
