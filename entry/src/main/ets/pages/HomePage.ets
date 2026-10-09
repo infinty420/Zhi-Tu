@@ -15,6 +15,7 @@ import { StudyInsightService } from '../services/StudyInsightService';
 import { ReviewScheduler } from '../services/ReviewScheduler';
 import { MasteryPredictor } from '../services/MasteryPredictor';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
+import { AchievementService } from '../services/AchievementService';
 import { Logger } from '../utils/Logger';
 
 /** 首页待复习优先级卡片项（Wave 5：按掌握度预测排序） */
@@ -48,6 +49,10 @@ export struct HomePage {
   @State streakDays: number = 0;
   @State todayEventCount: number = 0;
   @State todayProgress: number = 0; // 0~1 今日复习完成度
+
+  // Wave 7：每日打卡（显式打卡 streak，区别于基于学习事件的连续学习天数）
+  @State checkInStreak: number = 0;
+  @State checkedInToday: boolean = false;
 
   // Wave 2：自适应学习路径 · 为你推荐（按薄弱点推荐下一个该学的节点）
   @State recommendId: string = '';
@@ -101,6 +106,17 @@ export struct HomePage {
     }
     // Wave 5：对待复习节点按「紧急度 × 重要度 + 遗忘风险」排序，取前 3
     this.dueItems = this.computeDueItems(snap, now);
+    // Wave 7：刷新每日打卡状态
+    const ci = AchievementService.getInstance().getCheckIn();
+    this.checkInStreak = ci.streak;
+    this.checkedInToday = ci.checkedInToday;
+  }
+
+  private async doCheckIn(): Promise<void> {
+    const view = await AchievementService.getInstance().checkInToday();
+    this.checkInStreak = view.streak;
+    this.checkedInToday = view.checkedInToday;
+    promptAction.showToast({ message: view.checkedInToday ? `打卡成功，连续 ${view.streak} 天 🔥` : '今天已打卡' });
   }
 
   private computeDueItems(snap: MindMap | undefined, now: number): DueItem[] {
@@ -199,6 +215,43 @@ export struct HomePage {
           .fontSize(12)
           .fontColor('#8a94a6')
           .width('100%')
+      }
+      .padding(14)
+      .backgroundColor($r('app.color.zhitu_bg_card'))
+      .borderRadius($r('app.float.card_round_corner'))
+      .width('100%')
+
+      // Wave 7：每日打卡卡
+      Column({ space: 10 }) {
+        Row({ space: 8 }) {
+          Text('📅 每日打卡')
+            .fontSize(15)
+            .fontWeight(FontWeight.Bold)
+            .fontColor($r('app.color.zhitu_text_primary'))
+            .layoutWeight(1)
+          Text(this.checkInStreak > 0 ? `已连续打卡 ${this.checkInStreak} 天` : '还没开始打卡')
+            .fontSize(12)
+            .fontColor('#8a94a6')
+        }
+        .width('100%')
+        Row({ space: 10 }) {
+          Text(this.checkedInToday
+            ? '今天已打卡，明天再来 ✅'
+            : '打卡记录今天的学习，养成习惯 🔥')
+            .fontSize(13)
+            .fontColor('#1a2333')
+            .layoutWeight(1)
+          Button(this.checkedInToday ? '已打卡' : '今日打卡')
+            .height(34)
+            .fontSize(14)
+            .fontColor('#ffffff')
+            .backgroundColor(this.checkedInToday ? '#8a94a6' : '#fa8c16')
+            .enabled(!this.checkedInToday)
+            .onClick(() => {
+              this.doCheckIn();
+            })
+        }
+        .width('100%')
       }
       .padding(14)
       .backgroundColor($r('app.color.zhitu_bg_card'))

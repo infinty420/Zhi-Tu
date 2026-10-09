@@ -12,6 +12,7 @@ import { NodeType } from '../model/Constants';
 import { AccountService } from '../services/AccountService';
 import { CloudService } from '../services/CloudService';
 import { ClassService } from '../services/ClassService';
+import { AchievementService } from '../services/AchievementService';
 import { HomePage } from './HomePage';
 import { MindMapPage } from './MindMapPage';
 import { MyMapsPage } from './MyMapsPage';
@@ -44,6 +45,7 @@ struct Index {
     AccountService.getInstance().init();
     CloudService.getInstance().init();
     ClassService.getInstance().init();
+    AchievementService.getInstance().init();
     DeepLinkRouter.attach(this.pathStack);
     this.consumeLaunchIntent();
   }
