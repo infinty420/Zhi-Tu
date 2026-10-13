@@ -11,6 +11,7 @@ import { StudyInsightService, WeakPointItem, SubjectWeakProfile } from '../servi
 import { StudyReportService, StudyReport } from '../services/StudyReportService';
 import { MasteryPredictor } from '../services/MasteryPredictor';
 import { AccountService } from '../services/AccountService';
+import { AchievementService, AchievementView } from '../services/AchievementService';
 
 /** 记忆保持预测项（Wave 5：保持率越低越该复习） */
 interface RetainItem {
@@ -41,6 +42,8 @@ export struct StatsPage {
   @State reportDays: number = 7;
   // Wave 5：记忆保持预测（按保持率升序，最易忘的优先）
   @State retainItems: RetainItem[] = [];
+  // Wave 7：成就墙
+  @State achievements: AchievementView[] = [];
   private store: MindMapStore = MindMapStore.getInstance();
   private unsubscribe: (() => void) | undefined = undefined;
 
@@ -85,6 +88,8 @@ export struct StatsPage {
       this.retainItems = [];
     }
     this.report = StudyReportService.build(this.store.getLearningEvents(), this.store.getWrongItems(), this.reportDays);
+    // Wave 7：成就墙（实时依据学习统计推导）
+    this.achievements = AchievementService.getInstance().listAchievements();
   }
 
   /** 切换周报 / 月报 */
@@ -323,6 +328,69 @@ export struct StatsPage {
               .borderRadius(10)
               .width('100%')
             }, (r: RetainItem) => r.nodeId)
+          }
+          .padding({ left: 16, right: 16 })
+          .width('100%')
+        }
+
+        // Wave 7：成就墙
+        if (this.achievements.length > 0) {
+          Column({ space: 10 }) {
+            Row({ space: 8 }) {
+              Text('成就墙')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor('#1a2333')
+                .layoutWeight(1)
+              Text(`${AchievementService.getInstance().unlockedCount()} / ${this.achievements.length}`)
+                .fontSize(12)
+                .fontColor('#8a94a6')
+            }
+            .width('100%')
+            ForEach(this.achievements, (a: AchievementView) => {
+              Row({ space: 10 }) {
+                Text(a.unlocked ? a.icon : '🔒')
+                  .fontSize(20)
+                  .opacity(a.unlocked ? 1 : 0.45)
+                Column({ space: 2 }) {
+                  Row({ space: 6 }) {
+                    Text(a.title)
+                      .fontSize(13)
+                      .fontColor(a.unlocked ? '#1a2333' : '#8a94a6')
+                      .layoutWeight(1)
+                    Text(a.unlocked ? '已解锁' : `${a.current}/${a.threshold}`)
+                      .fontSize(11)
+                      .fontColor(a.unlocked ? '#52c41a' : '#8a94a6')
+                  }
+                  .width('100%')
+                  Text(a.desc)
+                    .fontSize(11)
+                    .fontColor('#8a94a6')
+                    .width('100%')
+                  Stack({ alignContent: Alignment.Start }) {
+                    Rect()
+                      .width('100%')
+                      .height(5)
+                      .radius(2.5)
+                      .fill('#eef1f6')
+                    Rect()
+                      .width(`${Math.round(a.progress * 100)}%`)
+                      .height(5)
+                      .radius(2.5)
+                      .fill(a.unlocked ? '#52c41a' : '#1677ff')
+                  }
+                  .width('100%')
+                  .height(5)
+                  .margin({ top: 2 })
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+              }
+              .padding(10)
+              .backgroundColor('#ffffff')
+              .borderRadius(10)
+              .width('100%')
+            }, (a: AchievementView) => a.id)
           }
           .padding({ left: 16, right: 16 })
           .width('100%')
