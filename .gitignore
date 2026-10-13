@@ -22,6 +22,6 @@ nul
 /.merkle-snapshot.json
 /.workbuddy
 
-# AI 密钥：rawfile/ai_config.json 含 apiKey，禁止入库；
-# 克隆后请复制 ai_config.example.json 为 ai_config.json 并填入自己的密钥。
-/entry/src/main/resources/rawfile/ai_config.json
+# AI 配置：rawfile/ai_config.json 随仓库一起提交（便于直接运行）；
+# apiKey 为空时应用自动回退到 Mock 模式，需要真实模型时自行填入。
+# 若不想公开自己的密钥，可在此处加一行忽略该文件。
