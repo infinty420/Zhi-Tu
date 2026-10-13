@@ -633,6 +633,15 @@ export class MindMapStore {
     return ReviewScheduler.dueCount(map);
   }
 
+  /** 当前导图待复习节点（供首页卡片 / 深链路由复用） */
+  dueReviewNodes(): MindNode[] {
+    const map = this.current;
+    if (!map) {
+      return [];
+    }
+    return ReviewScheduler.dueNodes(map);
+  }
+
   /** 学习统计快照（基于当前导图） */
   getStudyStats(): StudyStats {
     const map = this.current;

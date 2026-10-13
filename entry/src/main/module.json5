@@ -32,6 +32,13 @@
             ],
             "actions": [
               "ohos.want.action.home"
+            ],
+            "uris": [
+              {
+                "scheme": "zhitu",
+                "host": "open",
+                "path": ".*"
+              }
             ]
           }
         ]
@@ -49,6 +56,19 @@
             "resource": "$profile:backup_config"
           }
         ],
+      },
+      {
+        "name": "FormAbility",
+        "srcEntry": "./ets/form/FormAbility.ets",
+        "type": "form",
+        "exported": true,
+        "label": "$string:EntryAbility_label",
+        "metadata": [
+          {
+            "name": "ohos.extension.form",
+            "resource": "$profile:form_config"
+          }
+        ]
       }
     ]
   }
