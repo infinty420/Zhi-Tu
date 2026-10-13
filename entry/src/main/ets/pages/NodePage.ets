@@ -20,6 +20,8 @@ import { QAService, QAAnswer } from '../services/QAService';
 import { AIService, TutorMode, TutorChunk, QuizQuestion, SimilarQuizRequest } from '../services/AIService';
 import { AIServiceFactory } from '../services/AIServiceFactory';
 import { AIConfig } from '../services/AIConfig';
+import { TtsService } from '../services/TtsService';
+import { ContinueService } from '../services/ContinueService';
 import { QuizService } from '../services/QuizService';
 import { ReviewScheduler } from '../services/ReviewScheduler';
 import { ContentQualityChecker } from '../services/ContentQualityChecker';
@@ -93,6 +95,9 @@ export struct NodePage {
   @State tutorFromCache: boolean = false;
   @State similarFromCache: boolean = false;
 
+  // ---------- Wave 11：端侧语音朗读（朗读讲解） ----------
+  @State speaking: boolean = false;
+
   // ---------- Wave 1：下一步建议（基于复习排队 + 掌握度） ----------
   @State suggestText: string = '';
 
@@ -155,6 +160,10 @@ export struct NodePage {
     this.childItems = items;
     // Wave 1：下一步建议（基于复习排队 + 掌握度）
     this.suggestText = this.buildSuggestion(snap, node);
+    // Wave 12：记录停留节点为续学会话
+    if (this.nodeId.length > 0) {
+      ContinueService.getInstance().save(MindMapStore.getInstance().currentId(), this.nodeId, snap ? snap.title : '', this.nodeText);
+    }
   }
 
   /** 展示层去重：历史数据里反复点「AI 补充」会堆出重复条目，展示时按文本保留首条 */
@@ -309,6 +318,34 @@ export struct NodePage {
     this.aiAnswer = ans.answer;
     this.aiRefs = ans.refs;
     this.showAi = true;
+  }
+
+  /** Wave 11：端侧语音朗读讲解（朗读节点标题 + AI 讲解或要点原文） */
+  private readAloud(): void {
+    if (this.speaking) {
+      TtsService.stop();
+      this.speaking = false;
+      return;
+    }
+    let text = '';
+    if (this.aiAnswer.length > 0) {
+      text = `${this.nodeText}。${this.aiAnswer}`;
+    } else if (this.detailLines.length > 0) {
+      text = `${this.nodeText}。${this.detailLines.join('，')}`;
+    } else {
+      text = this.nodeText;
+    }
+    TtsService.speak(text);
+    this.speaking = true;
+    promptAction.showToast({ message: '端侧朗读中…' });
+  }
+
+  /** Wave 11：离场停止朗读，避免后台持续发声 */
+  aboutToDisappear(): void {
+    if (this.speaking) {
+      TtsService.stop();
+      this.speaking = false;
+    }
   }
 
   /** AI 补充学科化富内容：生成后按追加语义写入节点（不覆盖已有要点/公式）；与已有内容逐条去重 */
@@ -1325,6 +1362,16 @@ export struct NodePage {
               .backgroundColor('#1677ff')
               .onClick(() => {
                 this.aiExplain();
+              })
+            Button(this.speaking ? '⏹ 停止' : '🔊 朗读讲解')
+              .layoutWeight(1)
+              .height(42)
+              .fontSize(14)
+              .fontColor(this.speaking ? '#cf1322' : '#13c2c2')
+              .backgroundColor('#ffffff')
+              .border({ width: 1, color: this.speaking ? '#cf1322' : '#13c2c2' })
+              .onClick(() => {
+                this.readAloud();
               })
             Button(this.showQuiz ? '收起自测' : '快速自测')
               .layoutWeight(1)

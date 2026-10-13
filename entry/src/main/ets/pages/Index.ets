@@ -10,6 +10,7 @@ import { MindMapStore } from '../services/MindMapStore';
 import { MasteryPredictor } from '../services/MasteryPredictor';
 import { NodeType } from '../model/Constants';
 import { AccountService } from '../services/AccountService';
+import { ContinueService } from '../services/ContinueService';
 import { CloudService } from '../services/CloudService';
 import { ClassService } from '../services/ClassService';
 import { AchievementService } from '../services/AchievementService';
@@ -48,6 +49,7 @@ struct Index {
     MindMapStore.mountToAppStorage();
     MindMapStore.getInstance().ensureInit();
     AccountService.getInstance().init();
+    ContinueService.getInstance().init();
     CloudService.getInstance().init();
     ClassService.getInstance().init();
     AchievementService.getInstance().init();
@@ -59,7 +61,7 @@ struct Index {
     DeepLinkRouter.detach();
   }
 
-  /** 消费启动意图：深链 / 卡片 router 事件 → 经 DeepLinkRouter 进入对应节点或复习 */
+  /** 消费启动意图：深链 / 卡片 router 事件 / 跨设备流转 → 进入对应导图与节点 */
   private consumeLaunchIntent(): void {
     const store = MindMapStore.getInstance();
     const snap = store.currentSnapshot();
@@ -68,7 +70,17 @@ struct Index {
     }
     const nodeId = AppStorage.get<string>('launchNodeId') ?? '';
     const action = AppStorage.get<string>('launchAction') ?? '';
+    const continueMapId = AppStorage.get<string>('launchMapId') ?? '';
+    const continueNodeId = AppStorage.get<string>('launchContinueNodeId') ?? '';
+
+    // Wave 12：跨设备流转——先打开流转过来的导图，再跳转到上次停留节点
+    if (continueMapId.length > 0 && continueMapId !== store.currentId()) {
+      store.openMapById(continueMapId);
+    }
     let targetId = nodeId;
+    if (targetId.length === 0 && continueNodeId.length > 0) {
+      targetId = continueNodeId;
+    }
     if (targetId.length === 0 && action === 'review') {
       const now = Date.now();
       const due = store.dueReviewNodes().slice().sort((a, b) => MasteryPredictor.priority(b, now) - MasteryPredictor.priority(a, now));
@@ -77,7 +89,7 @@ struct Index {
       }
     }
     if (targetId.length > 0) {
-      const node = snap.findNode(targetId);
+      const node = store.currentSnapshot() ? store.currentSnapshot()!.findNode(targetId) : undefined;
       const type = node ? node.type : NodeType.GENERAL;
       DeepLinkRouter.route(targetId, type, '');
     }

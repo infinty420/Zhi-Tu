@@ -11,6 +11,7 @@ import { AgentPanel } from '../components/AgentPanel';
 import { AIResult, AIResultFailure, TutorChunk, TutorMode, TutorRequest, TutorResponse } from '../services/AIService';
 import { MindMapStore } from '../services/MindMapStore';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
+import { ContinueService } from '../services/ContinueService';
 import { AIConfig } from '../services/AIConfig';
 import { AIServiceFactory } from '../services/AIServiceFactory';
 import { ExportService } from '../services/ExportService';
@@ -48,6 +49,8 @@ export struct MindMapPage {
     });
     const snap = this.store.currentSnapshot();
     this.mapSnapshot = snap;
+    // Wave 12：记录当前导图为续学会话
+    ContinueService.getInstance().save(this.store.currentId(), '', snap ? snap.title : '', '');
   }
 
   aboutToDisappear(): void {

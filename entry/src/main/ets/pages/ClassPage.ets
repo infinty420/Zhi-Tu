@@ -10,6 +10,20 @@ import { MindMapStore } from '../services/MindMapStore';
 import { Assignment, ClassInsight, ClassRoom } from '../model/ClassModels';
 import { GenUid } from '../utils/GenUid';
 
+/** Wave 12：排行榜奖牌/名次 */
+function rankBadge(idx: number): string {
+  if (idx === 0) {
+    return '🥇';
+  }
+  if (idx === 1) {
+    return '🥈';
+  }
+  if (idx === 2) {
+    return '🥉';
+  }
+  return `${idx + 1}`;
+}
+
 function formatTime(ts: number): string {
   if (!ts || ts <= 0) {
     return '未设置';
@@ -37,6 +51,8 @@ export struct ClassPage {
   @State progress: AssignmentProgress[] = [];
   /** 班级整体画像 */
   @State summary: ClassSummary = { reportedCount: 0, avgMastery: 0, weakTotal: 0, topWeakText: '' };
+  /** Wave 12：班级实时排行（按掌握率降序） */
+  @State ranking: ClassInsight[] = [];
   /** 当前以「学生」身份加入时使用的名字 */
   private myName: string = '我';
 
@@ -66,6 +82,7 @@ export struct ClassPage {
     }
     this.progress = ClassInsightService.assignmentProgress(room);
     this.insights = ClassService.getInstance().getInsights(room.id);
+    this.ranking = this.insights.slice().sort((a: ClassInsight, b: ClassInsight) => b.masteryRate - a.masteryRate);
     this.summary = ClassInsightService.summarize(this.insights);
   }
 
@@ -300,6 +317,57 @@ export struct ClassPage {
         .fontSize(13)
         .fontColor('#8a94a6')
         .width('100%')
+
+      // Wave 12：班级实时排行（按掌握率降序，前三名奖牌）
+      Column({ space: 8 }) {
+        Row({ space: 8 }) {
+          Text('🏆 学习榜')
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor('#1a2333')
+            .layoutWeight(1)
+          Text(`${this.ranking.length} 人已回传`)
+            .fontSize(12)
+            .fontColor('#8a94a6')
+        }
+        .width('100%')
+        if (this.ranking.length === 0) {
+          Text('还没有同学回传学情，排行榜将在回传后实时更新')
+            .fontSize(12)
+            .fontColor('#8a94a6')
+            .width('100%')
+        } else {
+          ForEach(this.ranking, (g: ClassInsight, idx: number) => {
+            Row({ space: 10 }) {
+              Text(rankBadge(idx))
+                .fontSize(16)
+                .width(28)
+                .textAlign(TextAlign.Center)
+              Text(g.studentName)
+                .fontSize(14)
+                .fontColor('#1a2333')
+                .fontWeight(idx < 3 ? FontWeight.Bold : FontWeight.Normal)
+                .layoutWeight(1)
+              Text(`掌握 ${ClassInsightService.percent(g.masteryRate)}%`)
+                .fontSize(13)
+                .fontColor('#52c41a')
+              if (g.weakCount > 0) {
+                Text(`薄弱 ${g.weakCount}`)
+                  .fontSize(12)
+                  .fontColor('#cf1322')
+              }
+            }
+            .padding(8)
+            .backgroundColor(idx < 3 ? '#fffbe6' : '#ffffff')
+            .borderRadius(8)
+            .width('100%')
+          }, (g: ClassInsight, idx: number) => `${g.studentId}_${idx}`)
+        }
+      }
+      .padding(12)
+      .backgroundColor('#fff7e6')
+      .borderRadius(12)
+      .width('100%')
 
       // 本班学情（Wave 3）：作业完成率 + 学情回传画像
       Column({ space: 8 }) {

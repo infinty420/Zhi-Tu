@@ -6,6 +6,7 @@ import { promptAction } from '@kit.ArkUI';
 import { MindMapStore } from '../services/MindMapStore';
 import { StudyInsightService } from '../services/StudyInsightService';
 import { ReviewSummaryService, DueItem } from '../services/ReviewSummaryService';
+import { StudyPlanService, PlanDay, PlanTask } from '../services/StudyPlanService';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { AchievementService } from '../services/AchievementService';
 import { BottomTabBar } from '../components/BottomTabBar';
@@ -23,6 +24,8 @@ export struct StudyHubPage {
   @State checkedInToday: boolean = false;
   @State hasMap: boolean = false;
   @State dueItems: DueItem[] = [];
+  // Wave 11：本周学习计划
+  @State weekPlan: PlanDay[] = [];
   // Wave 10：专注模式（番茄钟）
   @State focusing: boolean = false;
   @State focusRemaining: number = 0;
@@ -93,6 +96,7 @@ export struct StudyHubPage {
     this.todayProgress = (done + remain) > 0 ? done / (done + remain) : 0;
     const now = Date.now();
     this.dueItems = ReviewSummaryService.computeDueItems(this.store.currentSnapshot(), now, 3);
+    this.weekPlan = StudyPlanService.buildWeekPlan(this.store.currentSnapshot(), this.store.getWrongItems(), now);
     const ci = AchievementService.getInstance().getCheckIn();
     this.checkInStreak = ci.streak;
     this.checkedInToday = ci.checkedInToday;
@@ -344,6 +348,100 @@ export struct StudyHubPage {
             .borderRadius($r('app.float.card_round_corner'))
             .width('100%')
           }
+
+          // Wave 11：本周学习计划（自动排程）
+          Column({ space: 10 }) {
+            Row({ space: 8 }) {
+              Text('🗓️ 本周学习计划')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.zhitu_text_primary'))
+                .layoutWeight(1)
+              Text(`共 ${StudyPlanService.totalTasks(this.weekPlan)} 项`)
+                .fontSize(12)
+                .fontColor('#8a94a6')
+            }
+            .width('100%')
+            if (this.weekPlan.length === 0 || StudyPlanService.totalTasks(this.weekPlan) === 0) {
+              Text('打开或生成导图后，这里会按到期与薄弱点自动排出 7 天计划')
+                .fontSize(13)
+                .fontColor('#8a94a6')
+                .width('100%')
+            } else {
+              Scroll() {
+                Row({ space: 10 }) {
+                  ForEach(this.weekPlan, (day: PlanDay) => {
+                    Column({ space: 6 }) {
+                      Row() {
+                        Text(day.label)
+                          .fontSize(13)
+                          .fontWeight(FontWeight.Bold)
+                          .fontColor(day.index === 0 ? '#1677ff' : '#1a2333')
+                        if (day.index === 0) {
+                          Text('今天')
+                            .fontSize(10)
+                            .fontColor('#ffffff')
+                            .backgroundColor('#1677ff')
+                            .borderRadius(6)
+                            .padding({ left: 5, right: 5, top: 1, bottom: 1 })
+                        }
+                      }
+                      .width('100%')
+                      if (day.tasks.length === 0) {
+                        Text('轻松一日')
+                          .fontSize(12)
+                          .fontColor('#b0b9c9')
+                      } else {
+                        Column({ space: 6 }) {
+                          ForEach(day.tasks, (t: PlanTask) => {
+                            Column({ space: 3 }) {
+                              Row({ space: 4 }) {
+                                Text(t.tag)
+                                  .fontSize(10)
+                                  .fontColor(t.tag === '已逾期' ? '#ffffff' : '#d48806')
+                                  .backgroundColor(t.tag === '已逾期' ? '#cf1322' : '#fff7e6')
+                                  .borderRadius(6)
+                                  .padding({ left: 5, right: 5, top: 1, bottom: 1 })
+                              }
+                              .width('100%')
+                              Text(t.nodeText)
+                                .fontSize(13)
+                                .fontColor('#1a2333')
+                                .maxLines(2)
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .width('100%')
+                            }
+                            .alignItems(HorizontalAlign.Start)
+                            .padding(8)
+                            .backgroundColor('#ffffff')
+                            .borderRadius(8)
+                            .width('100%')
+                            .onClick(() => {
+                              DeepLinkRouter.route(t.nodeId, t.nodeType, t.nodeText);
+                            })
+                          }, (t: PlanTask) => `${day.index}_${t.nodeId}`)
+                        }
+                        .width('100%')
+                      }
+                    }
+                    .alignItems(HorizontalAlign.Start)
+                    .padding(10)
+                    .backgroundColor('#eef6ff')
+                    .borderRadius(10)
+                    .width(140)
+                  }, (day: PlanDay) => `${day.index}`)
+                }
+                .width('100%')
+              }
+              .scrollable(ScrollDirection.Horizontal)
+              .scrollBar(BarState.Off)
+              .width('100%')
+            }
+          }
+          .padding(16)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
 
           Text('坚持每天复习，让记忆生根')
             .fontSize($r('app.float.caption_font_size'))

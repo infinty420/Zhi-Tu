@@ -2,6 +2,7 @@ import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.Ab
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { MindMapStore } from '../services/MindMapStore';
+import { ContinueService } from '../services/ContinueService';
 
 const DOMAIN = 0x0000;
 
@@ -22,6 +23,9 @@ export default class EntryAbility extends UIAbility {
     const params = want.parameters as Record<string, Object> | undefined;
     AppStorage.setOrCreate<string>('launchAction', params && params['action'] ? String(params['action']) : '');
     AppStorage.setOrCreate<string>('launchNodeId', params && params['nodeId'] ? String(params['nodeId']) : '');
+    // Wave 12：跨设备流转携带的导图 / 节点 id（onContinue 写入）
+    AppStorage.setOrCreate<string>('launchMapId', params && params['continueMapId'] ? String(params['continueMapId']) : '');
+    AppStorage.setOrCreate<string>('launchContinueNodeId', params && params['continueNodeId'] ? String(params['continueNodeId']) : '');
   }
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -30,11 +34,15 @@ export default class EntryAbility extends UIAbility {
     this.saveLaunchIntent(want);
   }
 
-  /** 跨设备流转：把当前导图 id 带入目标设备 */
+  /** 跨设备流转：把当前导图与停留节点 id 带入目标设备（onContinue 系统钩子） */
   onContinue(wantParam: Record<string, Object>): AbilityConstant.OnContinueResult {
     const snap = MindMapStore.getInstance().currentSnapshot();
     if (snap) {
       wantParam['continueMapId'] = snap.id;
+      const s = ContinueService.getInstance().get();
+      if (s && s.nodeId.length > 0) {
+        wantParam['continueNodeId'] = s.nodeId;
+      }
     }
     return AbilityConstant.OnContinueResult.AGREE;
   }

@@ -7,6 +7,9 @@ import { ModelFailure } from '../model/Constants';
 import { MindMapStore, MindMapSummary } from '../services/MindMapStore';
 import { ExportService } from '../services/ExportService';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
+import { CloudService } from '../services/CloudService';
+import { AccountService } from '../services/AccountService';
+import { CloudMapMeta } from '../model/Account';
 import { Logger } from '../utils/Logger';
 
 @Component
@@ -14,10 +17,15 @@ export struct MyMapsPage {
   @State summaries: MindMapSummary[] = [];
   @State showImport: boolean = false;
   @State importText: string = '';
+  // Wave 12：云端同步
+  @State cloudList: CloudMapMeta[] = [];
+  @State cloudBusy: boolean = false;
   private store: MindMapStore = MindMapStore.getInstance();
+  private cloud: CloudService = CloudService.getInstance();
 
   aboutToAppear(): void {
     this.refresh();
+    this.refreshCloud();
   }
 
   private async refresh(): Promise<void> {
@@ -77,6 +85,43 @@ export struct MyMapsPage {
     }
   }
 
+  private async refreshCloud(): Promise<void> {
+    this.cloudList = await this.cloud.list();
+  }
+
+  private async uploadCurrent(): Promise<void> {
+    const snap = this.store.currentSnapshot();
+    if (!snap) {
+      promptAction.showToast({ message: '请先打开或生成一张导图' });
+      return;
+    }
+    this.cloudBusy = true;
+    const acc = AccountService.getInstance().getCurrent();
+    const owner = acc && acc.name.length > 0 ? acc.name : '我';
+    await this.cloud.upload(snap, owner, false);
+    await this.refreshCloud();
+    this.cloudBusy = false;
+    promptAction.showToast({ message: '已上传到云端 ☁️' });
+  }
+
+  private async downloadCloud(id: string): Promise<void> {
+    this.cloudBusy = true;
+    const map = await this.cloud.download(id);
+    if (!map) {
+      promptAction.showToast({ message: '云端数据读取失败' });
+      this.cloudBusy = false;
+      return;
+    }
+    const r = this.store.importAsNew(map.toJson());
+    this.cloudBusy = false;
+    if (r.ok) {
+      await this.refresh();
+      promptAction.showToast({ message: '已从云端下载并导入' });
+    } else {
+      promptAction.showToast({ message: '导入失败' });
+    }
+  }
+
   private subjectColor(index: number): string {
     const colors: string[] = ['#1677ff', '#00b96b', '#fa8c16', '#722ed1', '#eb2f96', '#13c2c2', '#2f54eb', '#faad14', '#52c41a'];
     return colors[index % colors.length];
@@ -107,6 +152,79 @@ export struct MyMapsPage {
             })
         }
         .padding(12)
+        .width('100%')
+
+        // Wave 12：云端同步（本地数据可在多设备间迁移）
+        Column({ space: 10 }) {
+          Row({ space: 8 }) {
+            Text('☁️ 云端同步')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+              .layoutWeight(1)
+            Button('刷新云端')
+              .height(30)
+              .fontSize(12)
+              .backgroundColor('#f0f3f8')
+              .fontColor('#4a5468')
+              .onClick(() => {
+                this.refreshCloud();
+              })
+          }
+          .width('100%')
+          Row({ space: 10 }) {
+            Button('上传当前导图')
+              .layoutWeight(1)
+              .height(38)
+              .fontSize(13)
+              .backgroundColor('#13c2c2')
+              .enabled(!this.cloudBusy)
+              .onClick(() => {
+                this.uploadCurrent();
+              })
+          }
+          .width('100%')
+          if (this.cloudList.length === 0) {
+            Text('云端还没有导图，点「上传当前导图」备份或跨设备迁移')
+              .fontSize(12)
+              .fontColor('#8a94a6')
+              .width('100%')
+          } else {
+            Column({ space: 8 }) {
+              ForEach(this.cloudList, (m: CloudMapMeta) => {
+                Row({ space: 8 }) {
+                  Column({ space: 3 }) {
+                    Text(m.title)
+                      .fontSize(14)
+                      .fontColor('#1a2333')
+                      .maxLines(1)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    Text(`拥有者 ${m.owner} · ${this.formatTime(m.updatedAt)}`)
+                      .fontSize(11)
+                      .fontColor('#8a94a6')
+                  }
+                  .layoutWeight(1)
+                  .alignItems(HorizontalAlign.Start)
+                  Button('下载')
+                    .height(30)
+                    .fontSize(13)
+                    .backgroundColor('#1677ff')
+                    .onClick(() => {
+                      this.downloadCloud(m.id);
+                    })
+                }
+                .padding(10)
+                .backgroundColor('#ffffff')
+                .borderRadius(10)
+                .width('100%')
+              }, (m: CloudMapMeta) => m.id)
+            }
+            .width('100%')
+          }
+        }
+        .padding(16)
+        .backgroundColor('#eef6ff')
+        .borderRadius(12)
         .width('100%')
 
         if (this.summaries.length === 0) {

@@ -1,7 +1,8 @@
 /**
- * PhotoQuizPage —— 拍照识题（Wave 8，端侧 OCR，无云依赖）。
- * 流程：相册选图 → ImageSource 解码为 PixelMap → CoreVisionKit 端侧文本识别 →
- * 展示识别文字 → 一键生成思维导图。OCR 失败可手动编辑文字后继续。
+ * PhotoQuizPage —— 拍照识题（Wave 8 起，端侧 OCR，无云依赖）。
+ * 流程：相册多选 → ImageSource 解码为 PixelMap → CoreVisionKit 端侧文本识别 →
+ * 多张图识别文字累积 → 一键生成思维导图。支持「公式题模式」保留数学结构。
+ * OCR 失败可手动编辑文字后继续。
  */
 
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
@@ -17,11 +18,13 @@ import { Logger } from '../utils/Logger';
 @Entry
 @Component
 export struct PhotoQuizPage {
-  @State imgUri: string = '';
+  @State imgUris: string[] = [];
   @State recognized: string = '';
   @State editing: boolean = false;
   @State busy: boolean = false;
   @State toast: string = '';
+  /** Wave 11：公式题模式（保留数学/公式结构，生成时按数学学科提示） */
+  @State formulaMode: boolean = false;
   private store: MindMapStore = MindMapStore.getInstance();
 
   build() {
@@ -40,6 +43,18 @@ export struct PhotoQuizPage {
             .fontWeight(FontWeight.Bold)
             .fontColor('#1a2333')
             .layoutWeight(1)
+          // Wave 11：公式题模式开关
+          Row({ space: 6 }) {
+            Text(this.formulaMode ? '公式题' : '普通题')
+              .fontSize(12)
+              .fontColor(this.formulaMode ? '#d48806' : '#8a94a6')
+            Toggle({ type: ToggleType.Switch, isOn: this.formulaMode })
+              .width(42)
+              .height(24)
+              .onChange((v: boolean) => {
+                this.formulaMode = v;
+              })
+          }
         }
         .padding(12)
         .width('100%')
@@ -47,11 +62,11 @@ export struct PhotoQuizPage {
         Scroll() {
           Column({ space: 14 }) {
             Column({ space: 8 }) {
-              Text('把一道题的截图/照片选进来，端侧识别文字后一键生成导图。')
+              Text('把一道或多道题的截图/照片选进来，端侧识别文字后一键生成导图（可连续多张）。')
                 .fontSize(13)
                 .fontColor('#4a5468')
                 .width('100%')
-              Button(this.imgUri.length > 0 ? '重新选择图片' : '从相册选择题目')
+              Button(this.imgUris.length > 0 ? '继续添加图片' : '从相册选择题目(可多选)')
                 .width('100%')
                 .height(44)
                 .fontSize(14)
@@ -66,12 +81,26 @@ export struct PhotoQuizPage {
             .borderRadius(12)
             .width('100%')
 
-            if (this.imgUri.length > 0) {
-              Image(this.imgUri)
+            if (this.imgUris.length > 0) {
+              Text(`已选 ${this.imgUris.length} 张图片`)
+                .fontSize(12)
+                .fontColor('#8a94a6')
                 .width('100%')
-                .height(180)
-                .objectFit(ImageFit.Cover)
-                .borderRadius(10)
+              Scroll() {
+                Row({ space: 8 }) {
+                  ForEach(this.imgUris, (uri: string) => {
+                    Image(uri)
+                      .width(120)
+                      .height(120)
+                      .objectFit(ImageFit.Cover)
+                      .borderRadius(10)
+                  }, (uri: string) => uri)
+                }
+                .width('100%')
+              }
+              .scrollable(ScrollDirection.Horizontal)
+              .scrollBar(BarState.Off)
+              .width('100%')
             }
 
             if (this.recognized.length > 0 || this.editing) {
@@ -96,7 +125,7 @@ export struct PhotoQuizPage {
                 .width('100%')
                 if (this.editing) {
                   TextArea({ text: this.recognized, placeholder: '请填写或修正题目文字' })
-                    .height(120)
+                    .height(140)
                     .fontSize(14)
                     .onChange((v: string) => {
                       this.recognized = v;
@@ -168,7 +197,7 @@ export struct PhotoQuizPage {
     .backgroundColor('#F7F9FC')
   }
 
-  /** 选图 → 端侧 OCR */
+  /** 多选 → 逐张端侧 OCR，识别文字累积 */
   private async pickAndRecognize(): Promise<void> {
     if (this.busy) {
       return;
@@ -182,9 +211,10 @@ export struct PhotoQuizPage {
     }
     const options: photoAccessHelper.PhotoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
     options.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
-    options.maxSelectNumber = 1;
+    options.maxSelectNumber = 4;
     this.busy = true;
     this.toast = '';
+    let anyText = false;
     try {
       const result: photoAccessHelper.PhotoSelectResult = await picker.select(options);
       const uris: Array<string> = result.photoUris;
@@ -192,10 +222,20 @@ export struct PhotoQuizPage {
         this.busy = false;
         return;
       }
-      this.imgUri = uris[0];
-      const text = await this.recognize(uris[0]);
-      this.recognized = text;
-      if (text.length === 0) {
+      let acc = this.recognized.trim().length > 0 ? this.recognized.trim() + '\n\n' : '';
+      for (let i = 0; i < uris.length; i++) {
+        const uri = uris[i];
+        if (this.imgUris.indexOf(uri) < 0) {
+          this.imgUris.push(uri);
+        }
+        const text = await this.recognize(uri);
+        if (text.length > 0) {
+          anyText = true;
+          acc += (acc.length > 0 ? '\n' : '') + text;
+        }
+      }
+      this.recognized = acc;
+      if (!anyText) {
         this.editing = true;
         this.toast = '未识别到文字，可手动输入题目';
       }
@@ -229,7 +269,7 @@ export struct PhotoQuizPage {
     }
   }
 
-  /** 用识别文字生成思维导图（复用现有 AI 生成链路） */
+  /** 用识别文字生成思维导图（公式题模式按数学学科提示） */
   private async generate(): Promise<void> {
     const query = this.recognized.trim();
     if (query.length === 0) {
@@ -242,7 +282,7 @@ export struct PhotoQuizPage {
       const config = AIConfig.load();
       const svc = AIServiceFactory.create(config);
       const res = await svc.generateMindMap(
-        { query: query, subject: '', book: '' },
+        { query: query, subject: this.formulaMode ? 'math' : '', book: '' },
         () => { });
       if (res.ok) {
         const imported = this.store.importAsNew(res.data.map.toJson());

@@ -11,6 +11,7 @@ import { AIResultFailure } from '../services/AIService';
 import { AIServiceFactory } from '../services/AIServiceFactory';
 import { MindMapStore } from '../services/MindMapStore';
 import { StudyInsightService } from '../services/StudyInsightService';
+import { ContinueService, ContinueSession } from '../services/ContinueService';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { Logger } from '../utils/Logger';
 import { BottomTabBar } from '../components/BottomTabBar';
@@ -33,6 +34,9 @@ export struct HomePage {
   @State recommendType: NodeType = NodeType.GENERAL;
   @State recommendReason: string = '';
 
+  // Wave 12：跨设备续学（上次学习会话）
+  @State continueSession: ContinueSession | undefined = undefined;
+
   private store: MindMapStore = MindMapStore.getInstance();
   private templates: TemplateItem[] = listTemplates();
   private unsubscribe: (() => void) | undefined = undefined;
@@ -53,6 +57,7 @@ export struct HomePage {
 
   private refreshHub(): void {
     this.hasMap = this.store.hasCurrent();
+    this.continueSession = ContinueService.getInstance().get();
     const snap = this.store.currentSnapshot();
     const next = snap ? StudyInsightService.recommendNext(snap, this.store.getWrongItems()) : undefined;
     if (next) {
@@ -81,6 +86,59 @@ export struct HomePage {
             .fontSize($r('app.float.body_font_size'))
             .fontColor($r('app.color.zhitu_text_secondary'))
             .width('100%')
+
+          // Wave 12：继续上次学习（跨设备续学入口）
+          if (this.continueSession) {
+            Column({ space: 8 }) {
+              Row({ space: 8 }) {
+                Text('🔁 继续上次学习')
+                  .fontSize(15)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor($r('app.color.zhitu_text_primary'))
+                  .layoutWeight(1)
+                Text(this.relTime(this.continueSession.ts))
+                  .fontSize(12)
+                  .fontColor('#8a94a6')
+              }
+              .width('100%')
+              Text(this.continueSession.title)
+                .fontSize(14)
+                .fontColor('#1a2333')
+                .fontWeight(FontWeight.Medium)
+                .width('100%')
+              if (this.continueSession.nodeText.length > 0) {
+                Text(`上次停留：${this.continueSession.nodeText}`)
+                  .fontSize(12)
+                  .fontColor('#4a5468')
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .width('100%')
+              }
+              Row({ space: 10 }) {
+                Button('继续学习')
+                  .layoutWeight(1)
+                  .height(38)
+                  .fontSize(14)
+                  .backgroundColor('#13c2c2')
+                  .onClick(() => {
+                    this.resumeLast();
+                  })
+                Button('清除记录')
+                  .height(38)
+                  .fontSize(13)
+                  .fontColor('#8a94a6')
+                  .backgroundColor('#f3f4f6')
+                  .onClick(() => {
+                    this.clearContinue();
+                  })
+              }
+              .width('100%')
+            }
+            .padding(16)
+            .backgroundColor('#e6fffb')
+            .borderRadius($r('app.float.card_round_corner'))
+            .width('100%')
+          }
 
           // 输入卡片
           Column({ space: 12 }) {
@@ -264,6 +322,48 @@ export struct HomePage {
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.zhitu_bg_canvas'))
+  }
+
+  /** Wave 12：继续上次学习 */
+  private async resumeLast(): Promise<void> {
+    const s = ContinueService.getInstance().get();
+    if (!s) {
+      return;
+    }
+    const ok = await this.store.openMapById(s.mapId);
+    if (!ok) {
+      promptAction.showToast({ message: '导图不存在，可能已删除' });
+      await ContinueService.getInstance().clear();
+      this.refreshHub();
+      return;
+    }
+    if (s.nodeId && s.nodeId.length > 0) {
+      DeepLinkRouter.route(s.nodeId, NodeType.GENERAL, s.nodeText);
+    } else {
+      DeepLinkRouter.push('MindMapPage');
+    }
+  }
+
+  private async clearContinue(): Promise<void> {
+    await ContinueService.getInstance().clear();
+    this.refreshHub();
+    promptAction.showToast({ message: '已清除续学记录' });
+  }
+
+  private relTime(ts: number): string {
+    const diff = Date.now() - ts;
+    const min = Math.floor(diff / 60000);
+    if (min < 1) {
+      return '刚刚';
+    }
+    if (min < 60) {
+      return `${min} 分钟前`;
+    }
+    const hr = Math.floor(min / 60);
+    if (hr < 24) {
+      return `${hr} 小时前`;
+    }
+    return `${Math.floor(hr / 24)} 天前`;
   }
 
   private subjectLabels(): string[] {
