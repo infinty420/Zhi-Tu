@@ -217,7 +217,8 @@ export class StorageService {
       totalCount: map ? map.nodes.length : 0,
       masteryRate: 0,
       dueReviewCount: 0,
-      todayEventCount: 0
+      todayEventCount: 0,
+      focusMinutes: 0
     };
     // 天数集合与连续打卡
     const daySet: string[] = [];
@@ -258,6 +259,14 @@ export class StorageService {
       }
     }
     result.todayEventCount = todayCount;
+    // 累计专注时长（分钟）
+    let focus = 0;
+    for (let i = 0; i < this.events.length; i++) {
+      if (this.events[i].type === LearningEventType.FOCUS) {
+        focus = focus + (this.events[i].minutes ?? 0);
+      }
+    }
+    result.focusMinutes = focus;
     return result;
   }
 

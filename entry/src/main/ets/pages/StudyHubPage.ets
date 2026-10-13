@@ -23,6 +23,11 @@ export struct StudyHubPage {
   @State checkedInToday: boolean = false;
   @State hasMap: boolean = false;
   @State dueItems: DueItem[] = [];
+  // Wave 10：专注模式（番茄钟）
+  @State focusing: boolean = false;
+  @State focusRemaining: number = 0;
+  @State focusTotal: number = 0;
+  private focusTimer: number = 0;
   private store: MindMapStore = MindMapStore.getInstance();
   private unsubscribe: (() => void) | undefined = undefined;
 
@@ -37,6 +42,43 @@ export struct StudyHubPage {
     if (this.unsubscribe) {
       this.unsubscribe();
       this.unsubscribe = undefined;
+    }
+    this.clearFocus();
+  }
+
+  private formatTime(sec: number): string {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+  }
+
+  private startFocus(minutes: number): void {
+    this.clearFocus();
+    this.focusTotal = minutes * 60;
+    this.focusRemaining = minutes * 60;
+    this.focusing = true;
+    this.focusTimer = setInterval(() => {
+      this.focusRemaining = this.focusRemaining - 1;
+      if (this.focusRemaining <= 0) {
+        this.finishFocus(true);
+      }
+    }, 1000) as number;
+  }
+
+  private finishFocus(natural: boolean): void {
+    const elapsed = this.focusTotal - Math.max(0, this.focusRemaining);
+    this.clearFocus();
+    const usedMin = Math.max(1, Math.ceil(elapsed / 60));
+    this.store.recordFocus(usedMin);
+    this.focusing = false;
+    promptAction.showToast({ message: `专注 ${usedMin} 分钟已记录 🍅` });
+    this.refresh();
+  }
+
+  private clearFocus(): void {
+    if (this.focusTimer > 0) {
+      clearInterval(this.focusTimer);
+      this.focusTimer = 0;
     }
   }
 
@@ -64,9 +106,10 @@ export struct StudyHubPage {
   }
 
   build() {
-    Column() {
-      Scroll() {
-        Column({ space: 16 }) {
+    Stack() {
+      Column() {
+        Scroll() {
+          Column({ space: 16 }) {
           Text('学习中心')
             .fontSize($r('app.float.large_font_size'))
             .fontWeight(FontWeight.Bold)
@@ -183,6 +226,55 @@ export struct StudyHubPage {
           .borderRadius($r('app.float.card_round_corner'))
           .width('100%')
 
+          // Wave 10：专注模式
+          Column({ space: 10 }) {
+            Row({ space: 8 }) {
+              Text('🍅 专注模式')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.zhitu_text_primary'))
+                .layoutWeight(1)
+              if (this.focusing) {
+                Text(this.formatTime(this.focusRemaining))
+                  .fontSize(14)
+                  .fontColor('#fa8c16')
+                  .fontWeight(FontWeight.Bold)
+              }
+            }
+            .width('100%')
+            if (!this.focusing) {
+              Row({ space: 10 }) {
+                this.tile('专注 15 分', '#fa8c16', () => {
+                  this.startFocus(15);
+                })
+                this.tile('专注 25 分', '#fa8c16', () => {
+                  this.startFocus(25);
+                })
+                this.tile('专注 45 分', '#fa8c16', () => {
+                  this.startFocus(45);
+                })
+              }
+              .width('100%')
+              Text('开始专注后自动计时，结束时记录学习时长')
+                .fontSize(12)
+                .fontColor('#8a94a6')
+                .width('100%')
+            } else {
+              Button('结束并保存')
+                .width('100%')
+                .height(40)
+                .fontSize(14)
+                .backgroundColor('#1677ff')
+                .onClick(() => {
+                  this.finishFocus(false);
+                })
+            }
+          }
+          .padding(16)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
+
           // 今日复习优先级
           if (this.dueItems.length > 0) {
             Column({ space: 8 }) {
@@ -268,6 +360,39 @@ export struct StudyHubPage {
       .edgeEffect(EdgeEffect.Spring)
 
       BottomTabBar({ selectedTab: this.tabKey, onTabChange: this.onTabChange })
+      }
+      .width('100%')
+      .height('100%')
+      if (this.focusing) {
+        Column() {
+          Column({ space: 20 }) {
+            Text('🍅 专注中')
+              .fontSize(22)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+            Text(this.formatTime(this.focusRemaining))
+              .fontSize(48)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#fa8c16')
+            Text('保持专注，时间会给你答案')
+              .fontSize(14)
+              .fontColor('#8a94a6')
+            Button('结束并保存')
+              .width('60%')
+              .height(44)
+              .fontSize(15)
+              .backgroundColor('#1677ff')
+              .onClick(() => {
+                this.finishFocus(false);
+              })
+          }
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor('#ffffff')
+      }
     }
     .width('100%')
     .height('100%')

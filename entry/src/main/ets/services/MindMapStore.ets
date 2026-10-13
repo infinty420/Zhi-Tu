@@ -673,7 +673,7 @@ export class MindMapStore {
     this.storage.removeVocabItem(id);
   }
 
-  private recordStudyEvent(nodeId: string, type: LearningEventType, mastery: MasteryLevel, correct?: boolean): void {
+  private recordStudyEvent(nodeId: string, type: LearningEventType, mastery: MasteryLevel, correct?: boolean, minutes?: number): void {
     const map = this.current;
     if (!map) {
       return;
@@ -685,9 +685,23 @@ export class MindMapStore {
       date: MindMapStore.todayStr(),
       type: type,
       mastery: mastery,
-      correct: correct
+      correct: correct,
+      minutes: minutes
     };
     this.storage.addLearningEvent(ev);
+  }
+
+  /** 专注计时结束：记录一段专注时长（分钟） */
+  recordFocus(minutes: number): void {
+    if (minutes <= 0) {
+      return;
+    }
+    const map = this.current;
+    if (!map) {
+      return;
+    }
+    this.recordStudyEvent('', LearningEventType.FOCUS, MasteryLevel.UNSET, undefined, minutes);
+    this.schedulePersist();
   }
 
   private static todayStr(): string {

@@ -12,6 +12,7 @@ import { StudyReportService, StudyReport } from '../services/StudyReportService'
 import { MasteryPredictor } from '../services/MasteryPredictor';
 import { AccountService } from '../services/AccountService';
 import { AchievementService, AchievementView } from '../services/AchievementService';
+import { NodeType, NODE_TYPE_LABEL } from '../model/Constants';
 
 /** 记忆保持预测项（Wave 5：保持率越低越该复习） */
 interface RetainItem {
@@ -19,6 +20,19 @@ interface RetainItem {
   text: string;
   /** 当前记忆保持率百分比 0~100 */
   retainPct: number;
+}
+
+/** 日历单元格（Wave 10） */
+interface CalCell {
+  day: number;
+  date: string;
+  dueCount: number;
+}
+
+/** 选中日的待复习项（Wave 10） */
+interface DueCalItem {
+  text: string;
+  type: NodeType;
 }
 
 @Component
@@ -31,7 +45,8 @@ export struct StatsPage {
     totalCount: 0,
     masteryRate: 0,
     dueReviewCount: 0,
-    todayEventCount: 0
+    todayEventCount: 0,
+    focusMinutes: 0
   };
   @State hasMap: boolean = false;
   // Wave 2：学情画像 / 薄弱点
@@ -44,6 +59,14 @@ export struct StatsPage {
   @State retainItems: RetainItem[] = [];
   // Wave 7：成就墙
   @State achievements: AchievementView[] = [];
+  // Wave 10：复习日历
+  @State calYear: number = 0;
+  @State calMonth: number = 0;
+  @State calCells: CalCell[] = [];
+  @State selectedDate: string = '';
+  @State selectedDueItems: DueCalItem[] = [];
+  @State calRows: number = 0;
+  private dueBucket: Map<string, DueCalItem[]> = new Map();
   private store: MindMapStore = MindMapStore.getInstance();
   private unsubscribe: (() => void) | undefined = undefined;
 
@@ -90,6 +113,100 @@ export struct StatsPage {
     this.report = StudyReportService.build(this.store.getLearningEvents(), this.store.getWrongItems(), this.reportDays);
     // Wave 7：成就墙（实时依据学习统计推导）
     this.achievements = AchievementService.getInstance().listAchievements();
+    // Wave 10：复习日历（保留已选月份，首次进入初始化为当前月）
+    if (this.calYear === 0) {
+      const now = new Date();
+      this.buildCalendar(now.getFullYear(), now.getMonth());
+    } else {
+      this.buildCalendar(this.calYear, this.calMonth);
+    }
+  }
+
+  private pad2(n: number): string {
+    return n < 10 ? '0' + n : '' + n;
+  }
+
+  private typeLabel(t: NodeType): string {
+    const l = NODE_TYPE_LABEL.get(t);
+    return l === undefined ? '' : l;
+  }
+
+  /** 构建某月的日历单元格，并按节点 nextReviewAt 聚合「当日待复习」 */
+  private buildCalendar(year: number, month: number): void {
+    this.calYear = year;
+    this.calMonth = month;
+    const snap = this.store.currentSnapshot();
+    const bucket: Map<string, DueCalItem[]> = new Map();
+    if (snap) {
+      for (let i = 0; i < snap.nodes.length; i++) {
+        const n = snap.nodes[i];
+        if (n.nextReviewAt > 0) {
+          const d = new Date(n.nextReviewAt);
+          if (d.getFullYear() === year && d.getMonth() === month) {
+            const key = `${year}-${this.pad2(month + 1)}-${this.pad2(d.getDate())}`;
+            let arr = bucket.get(key);
+            if (!arr) {
+              arr = [];
+              bucket.set(key, arr);
+            }
+            arr.push({ text: n.text, type: n.type });
+          }
+        }
+      }
+    }
+    this.dueBucket = bucket;
+    const first = new Date(year, month, 1);
+    const startW = first.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells: CalCell[] = [];
+    for (let i = 0; i < startW; i++) {
+      cells.push({ day: 0, date: `e${i}`, dueCount: 0 });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${year}-${this.pad2(month + 1)}-${this.pad2(d)}`;
+      const arr = bucket.get(key);
+      cells.push({ day: d, date: key, dueCount: arr ? arr.length : 0 });
+    }
+    this.calCells = cells;
+    this.calRows = Math.ceil(cells.length / 7);
+    if (this.selectedDate.length === 0) {
+      const now = new Date();
+      this.selectedDate = `${now.getFullYear()}-${this.pad2(now.getMonth() + 1)}-${this.pad2(now.getDate())}`;
+    }
+    this.refreshSelected();
+  }
+
+  private refreshSelected(): void {
+    const arr = this.dueBucket.get(this.selectedDate);
+    this.selectedDueItems = arr ? arr : [];
+  }
+
+  private selectDay(c: CalCell): void {
+    if (c.day === 0) {
+      return;
+    }
+    this.selectedDate = c.date;
+    this.refreshSelected();
+  }
+
+  private prevMonth(): void {
+    let y = this.calYear;
+    let m = this.calMonth - 1;
+    if (m < 0) {
+      m = 11;
+      y = y - 1;
+    }
+    this.buildCalendar(y, m);
+  }
+
+  private nextMonth(): void {
+    let y = this.calYear;
+    let m = this.calMonth + 1;
+    if (m > 11) {
+      m = 0;
+      y = y + 1;
+    }
+    this.buildCalendar(y, m);
   }
 
   /** 切换周报 / 月报 */
@@ -100,6 +217,28 @@ export struct StatsPage {
 
   private get masteryPercent(): number {
     return Math.round(this.stats.masteryRate * 100);
+  }
+
+  @Builder
+  calDayCell(c: CalCell) {
+    Column() {
+      Text(c.day === 0 ? '' : `${c.day}`)
+        .fontSize(13)
+        .fontColor(c.day === 0 ? '#00000000' : (c.date === this.selectedDate ? '#ffffff' : '#1a2333'))
+      if (c.dueCount > 0) {
+        Text(`${c.dueCount}`)
+          .fontSize(10)
+          .fontColor(c.date === this.selectedDate ? '#ffffff' : '#fa8c16')
+      }
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+    .borderRadius(8)
+    .backgroundColor(c.day === 0 ? Color.Transparent : (c.date === this.selectedDate ? '#1677ff' : (c.dueCount > 0 ? '#fff4e6' : '#f3f4f6')))
+    .onClick(() => {
+      this.selectDay(c);
+    })
   }
 
   build() {
@@ -333,6 +472,104 @@ export struct StatsPage {
             .padding({ left: 16, right: 16 })
             .width('100%')
           }
+
+          // Wave 10：复习日历
+          Column({ space: 10 }) {
+            Row({ space: 8 }) {
+              Text('复习日历')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.zhitu_text_primary'))
+                .layoutWeight(1)
+              Text(this.stats.focusMinutes > 0 ? `累计专注 ${Math.round(this.stats.focusMinutes)} 分钟` : '')
+                .fontSize(12)
+                .fontColor('#8a94a6')
+            }
+            .width('100%')
+            Row({ space: 8 }) {
+              Button('‹')
+                .width(36)
+                .height(36)
+                .fontSize(18)
+                .backgroundColor('#eef1f6')
+                .fontColor('#1a2333')
+                .onClick(() => {
+                  this.prevMonth();
+                })
+              Text(`${this.calYear}年${this.calMonth + 1}月`)
+                .fontSize(14)
+                .fontWeight(FontWeight.Bold)
+                .fontColor('#1a2333')
+                .layoutWeight(1)
+                .textAlign(TextAlign.Center)
+              Button('›')
+                .width(36)
+                .height(36)
+                .fontSize(18)
+                .backgroundColor('#eef1f6')
+                .fontColor('#1a2333')
+                .onClick(() => {
+                  this.nextMonth();
+                })
+            }
+            .width('100%')
+            Row({ space: 0 }) {
+              ForEach(['日', '一', '二', '三', '四', '五', '六'], (w: string) => {
+                Text(w)
+                  .fontSize(12)
+                  .fontColor('#8a94a6')
+                  .textAlign(TextAlign.Center)
+                  .layoutWeight(1)
+              }, (w: string) => w)
+            }
+            .width('100%')
+            Grid() {
+              ForEach(this.calCells, (c: CalCell) => {
+                GridItem() {
+                  this.calDayCell(c)
+                }
+              }, (c: CalCell) => `${c.date}`)
+            }
+            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr')
+            .rowsGap(6)
+            .columnsGap(6)
+            .height(this.calRows * 46)
+            .width('100%')
+
+            // 选中日待复习清单
+            Column({ space: 6 }) {
+              Text(this.selectedDate.length > 0 ? `${this.selectedDate} 待复习` : '待复习')
+                .fontSize(13)
+                .fontColor('#1a2333')
+                .fontWeight(FontWeight.Bold)
+              if (this.selectedDueItems.length === 0) {
+                Text('当天没有排定的复习')
+                  .fontSize(12)
+                  .fontColor('#8a94a6')
+              } else {
+                ForEach(this.selectedDueItems, (it: DueCalItem) => {
+                  Row({ space: 8 }) {
+                    Text(it.text)
+                      .fontSize(13)
+                      .fontColor('#1a2333')
+                      .layoutWeight(1)
+                      .maxLines(1)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    Text(this.typeLabel(it.type))
+                      .fontSize(11)
+                      .fontColor('#8a94a6')
+                  }
+                  .width('100%')
+                }, (it: DueCalItem) => it.text + it.type)
+              }
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
+          .padding(16)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
 
           // Wave 7：成就墙
           if (this.achievements.length > 0) {

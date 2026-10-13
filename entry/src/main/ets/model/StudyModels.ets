@@ -9,7 +9,8 @@ import { MasteryLevel } from './Constants';
 export enum LearningEventType {
   STUDY = 'study', // 学习模式下标记掌握度
   QUIZ = 'quiz', // 自测作答
-  REVIEW = 'review' // 复习消项
+  REVIEW = 'review', // 复习消项
+  FOCUS = 'focus' // 专注计时（番茄钟）
 }
 
 /** 单次学习事件（按日聚合统计的原子记录） */
@@ -21,6 +22,7 @@ export interface LearningEvent {
   type: LearningEventType;
   mastery: MasteryLevel;
   correct?: boolean;
+  minutes?: number; // 专注时长（FOCUS 事件）
 }
 
 /** 错题本条目 */
@@ -54,4 +56,5 @@ export interface StudyStats {
   masteryRate: number; // 掌握率 0~1
   dueReviewCount: number; // 今日待复习数
   todayEventCount: number; // 今日学习事件数（复习/自测/标记掌握）
+  focusMinutes: number; // 累计专注时长（分钟）
 }
