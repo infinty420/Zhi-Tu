@@ -515,6 +515,18 @@ export struct HomePage {
             })
         }
         .width('100%')
+        Row({ space: 10 }) {
+          Button('📷 拍照识题')
+            .height(40)
+            .fontSize(14)
+            .fontColor('#ffffff')
+            .backgroundColor('#13c2c2')
+            .layoutWeight(1)
+            .onClick(() => {
+              DeepLinkRouter.push('PhotoQuizPage');
+            })
+        }
+        .width('100%')
       }
       .padding(16)
       .backgroundColor($r('app.color.zhitu_bg_card'))

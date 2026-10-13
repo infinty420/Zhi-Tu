@@ -31,6 +31,7 @@ import { SharePage } from './SharePage';
 import { MarketPage } from './MarketPage';
 import { ClassPage } from './ClassPage';
 import { SearchPage } from './SearchPage';
+import { PhotoQuizPage } from './PhotoQuizPage';
 import { NodePage } from './NodePage';
 
 @Entry
@@ -114,6 +115,8 @@ struct Index {
       ClassPage()
     } else if (name === 'SearchPage') {
       SearchPage()
+    } else if (name === 'PhotoQuizPage') {
+      PhotoQuizPage()
     } else if (name === 'NodePage') {
       NodePage()
     }
