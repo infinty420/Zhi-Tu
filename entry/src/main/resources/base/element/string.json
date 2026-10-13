@@ -1,0 +1,612 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "智图"
+    },
+    {
+      "name": "module_desc",
+      "value": "智图应用模块"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "智图 · 知识点思维导图互动学习"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "智图"
+    },
+    {
+      "name": "home_title",
+      "value": "智图"
+    },
+    {
+      "name": "home_subtitle",
+      "value": "输入知识点，生成一张会思考的思维导图"
+    },
+    {
+      "name": "home_input_placeholder",
+      "value": "输入知识点，如「二次函数」「光的折射」"
+    },
+    {
+      "name": "home_subject_label",
+      "value": "学科"
+    },
+    {
+      "name": "home_book_label",
+      "value": "参考教材"
+    },
+    {
+      "name": "home_book_placeholder",
+      "value": "如：人教版 九年级物理 第十三章"
+    },
+    {
+      "name": "home_generate",
+      "value": "生成思维导图"
+    },
+    {
+      "name": "home_generating",
+      "value": "正在生成…"
+    },
+    {
+      "name": "home_empty_input_tip",
+      "value": "请输入知识点内容"
+    },
+    {
+      "name": "home_generate_failed",
+      "value": "生成失败，请重试"
+    },
+    {
+      "name": "home_invalid_output",
+      "value": "生成内容异常，请重新生成"
+    },
+    {
+      "name": "home_retry",
+      "value": "重新生成"
+    },
+    {
+      "name": "home_restructure",
+      "value": "换一种结构"
+    },
+    {
+      "name": "home_my_maps",
+      "value": "我的导图"
+    },
+    {
+      "name": "map_title",
+      "value": "思维导图"
+    },
+    {
+      "name": "map_layout_tree_h",
+      "value": "树状左右"
+    },
+    {
+      "name": "map_layout_tree_v",
+      "value": "树状上下"
+    },
+    {
+      "name": "map_layout_radial",
+      "value": "放射状"
+    },
+    {
+      "name": "map_theme",
+      "value": "主题"
+    },
+    {
+      "name": "map_export_image",
+      "value": "导出图片"
+    },
+    {
+      "name": "map_export_json",
+      "value": "导出 JSON"
+    },
+    {
+      "name": "map_add_child",
+      "value": "新增子节点"
+    },
+    {
+      "name": "map_rename",
+      "value": "重命名"
+    },
+    {
+      "name": "map_delete",
+      "value": "删除"
+    },
+    {
+      "name": "map_delete_confirm",
+      "value": "该节点含子节点，删除将级联删除其全部子节点，确认删除？"
+    },
+    {
+      "name": "map_delete_root_forbidden",
+      "value": "根节点不可删除"
+    },
+    {
+      "name": "map_enter",
+      "value": "进入"
+    },
+    {
+      "name": "map_collapse",
+      "value": "折叠"
+    },
+    {
+      "name": "map_expand",
+      "value": "展开"
+    },
+    {
+      "name": "map_edit_detail",
+      "value": "要点详情"
+    },
+    {
+      "name": "map_edit_style",
+      "value": "节点样式"
+    },
+    {
+      "name": "map_edit_type",
+      "value": "节点类型"
+    },
+    {
+      "name": "map_type_general",
+      "value": "普通"
+    },
+    {
+      "name": "map_type_math",
+      "value": "数学"
+    },
+    {
+      "name": "map_type_physics",
+      "value": "物理"
+    },
+    {
+      "name": "map_type_english",
+      "value": "英语"
+    },
+    {
+      "name": "map_type_history",
+      "value": "历史"
+    },
+    {
+      "name": "map_type_geo",
+      "value": "地理"
+    },
+    {
+      "name": "map_type_chem",
+      "value": "化学"
+    },
+    {
+      "name": "map_type_bio",
+      "value": "生物"
+    },
+    {
+      "name": "tutor_explain",
+      "value": "讲细一点"
+    },
+    {
+      "name": "tutor_similar",
+      "value": "出两道相似题"
+    },
+    {
+      "name": "tutor_rephrase",
+      "value": "换个说法"
+    },
+    {
+      "name": "map_shape_rect",
+      "value": "矩形"
+    },
+    {
+      "name": "map_shape_round",
+      "value": "圆角矩形"
+    },
+    {
+      "name": "map_shape_ellipse",
+      "value": "椭圆"
+    },
+    {
+      "name": "map_confirm",
+      "value": "确定"
+    },
+    {
+      "name": "map_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "map_move_cycle_forbidden",
+      "value": "不能将节点移动到其自身子树下"
+    },
+    {
+      "name": "map_save_failed",
+      "value": "保存失败，请检查存储空间"
+    },
+    {
+      "name": "map_rich",
+      "value": "富内容"
+    },
+    {
+      "name": "map_empty_title",
+      "value": "请先在上方生成一张思维导图"
+    },
+    {
+      "name": "map_agent_placeholder",
+      "value": "向 AI 输入改图指令，如「展开二次函数分支」"
+    },
+    {
+      "name": "map_agent_send",
+      "value": "发送"
+    },
+    {
+      "name": "map_agent_empty_tip",
+      "value": "用一句话让 AI 帮你改图：展开分支、补充要点、批量改样式、切换布局…"
+    },
+    {
+      "name": "map_agent_unavailable",
+      "value": "Agent 暂时不可用，请稍后重试"
+    },
+    {
+      "name": "map_agent_context_truncated",
+      "value": "为保持对话连续，已精简较早对话"
+    },
+    {
+      "name": "map_agent_applied",
+      "value": "已应用修改"
+    },
+    {
+      "name": "map_agent_partly_failed",
+      "value": "部分指令未生效"
+    },
+    {
+      "name": "my_maps_title",
+      "value": "我的导图"
+    },
+    {
+      "name": "my_maps_empty",
+      "value": "暂无导图，去首页生成一张吧"
+    },
+    {
+      "name": "my_maps_delete",
+      "value": "删除"
+    },
+    {
+      "name": "my_maps_delete_confirm",
+      "value": "确认删除该导图？删除后不可恢复。"
+    },
+    {
+      "name": "my_maps_export_image",
+      "value": "导出图片"
+    },
+    {
+      "name": "my_maps_export_json",
+      "value": "导出 JSON"
+    },
+    {
+      "name": "my_maps_import",
+      "value": "导入 JSON"
+    },
+    {
+      "name": "my_maps_damaged",
+      "value": "数据异常"
+    },
+    {
+      "name": "my_maps_export_failed",
+      "value": "导出失败，请检查存储空间"
+    },
+    {
+      "name": "my_maps_import_invalid",
+      "value": "导入文件格式不正确"
+    },
+    {
+      "name": "tool_export_success",
+      "value": "导出成功"
+    },
+    {
+      "name": "tool_backfill_success",
+      "value": "已回填到节点备注"
+    },
+    {
+      "name": "nav_back",
+      "value": "返回"
+    },
+    {
+      "name": "math_title",
+      "value": "数学绘图"
+    },
+    {
+      "name": "math_expr_placeholder",
+      "value": "输入函数，如 y=x^2"
+    },
+    {
+      "name": "math_draw",
+      "value": "绘制"
+    },
+    {
+      "name": "math_invalid_expr",
+      "value": "表达式无效，请检查输入"
+    },
+    {
+      "name": "math_error_position",
+      "value": "错误位置"
+    },
+    {
+      "name": "math_template_label",
+      "value": "模板"
+    },
+    {
+      "name": "math_tool_point",
+      "value": "点"
+    },
+    {
+      "name": "math_tool_line",
+      "value": "线"
+    },
+    {
+      "name": "math_tool_circle",
+      "value": "圆"
+    },
+    {
+      "name": "math_tool_triangle",
+      "value": "三角形"
+    },
+    {
+      "name": "math_keypoint_vertex",
+      "value": "顶点"
+    },
+    {
+      "name": "math_keypoint_zero",
+      "value": "零点"
+    },
+    {
+      "name": "math_keypoint_intersect",
+      "value": "交点"
+    },
+    {
+      "name": "physics_title",
+      "value": "物理模型"
+    },
+    {
+      "name": "physics_model_label",
+      "value": "选择模型"
+    },
+    {
+      "name": "physics_play",
+      "value": "播放"
+    },
+    {
+      "name": "physics_pause",
+      "value": "暂停"
+    },
+    {
+      "name": "physics_reset",
+      "value": "重置"
+    },
+    {
+      "name": "physics_param_out_of_range",
+      "value": "参数超出有效范围"
+    },
+    {
+      "name": "physics_param_panel",
+      "value": "参数面板"
+    },
+    {
+      "name": "english_title",
+      "value": "英语例句"
+    },
+    {
+      "name": "english_load_tip",
+      "value": "正在生成例句…"
+    },
+    {
+      "name": "english_load_failed",
+      "value": "例句生成失败，请重试"
+    },
+    {
+      "name": "english_retry",
+      "value": "重试"
+    },
+    {
+      "name": "english_collect",
+      "value": "收藏"
+    },
+    {
+      "name": "english_collected",
+      "value": "已收藏"
+    },
+    {
+      "name": "english_backfill",
+      "value": "收藏并回填节点"
+    },
+    {
+      "name": "english_tts_unavailable",
+      "value": "当前设备暂不支持语音朗读"
+    },
+    {
+      "name": "english_favorite_empty",
+      "value": "尚未收藏例句"
+    },
+    {
+      "name": "common_loading",
+      "value": "加载中…"
+    },
+    {
+      "name": "common_empty",
+      "value": "暂无内容"
+    },
+    {
+      "name": "study_mode",
+      "value": "学习模式"
+    },
+    {
+      "name": "study_title",
+      "value": "学习模式"
+    },
+    {
+      "name": "mastery_label",
+      "value": "掌握度"
+    },
+    {
+      "name": "mastery_known",
+      "value": "会"
+    },
+    {
+      "name": "mastery_fuzzy",
+      "value": "模糊"
+    },
+    {
+      "name": "mastery_unknown",
+      "value": "不会"
+    },
+    {
+      "name": "study_done_title",
+      "value": "本轮学习完成"
+    },
+    {
+      "name": "study_start_quiz",
+      "value": "开始 AI 自测"
+    },
+    {
+      "name": "study_prev",
+      "value": "上一个"
+    },
+    {
+      "name": "study_next",
+      "value": "下一个"
+    },
+    {
+      "name": "study_finish",
+      "value": "完成"
+    },
+    {
+      "name": "study_detail_empty",
+      "value": "暂无要点"
+    },
+    {
+      "name": "quiz_your_answer",
+      "value": "你的作答"
+    },
+    {
+      "name": "quiz_submit",
+      "value": "提交判分"
+    },
+    {
+      "name": "quiz_next",
+      "value": "下一题"
+    },
+    {
+      "name": "quiz_correct",
+      "value": "答对"
+    },
+    {
+      "name": "quiz_wrong",
+      "value": "答错"
+    },
+    {
+      "name": "quiz_explanation",
+      "value": "解析"
+    },
+    {
+      "name": "quiz_summary",
+      "value": "自测小结"
+    },
+    {
+      "name": "quiz_generating",
+      "value": "正在生成测验题…"
+    },
+    {
+      "name": "stats_title",
+      "value": "学习统计"
+    },
+    {
+      "name": "stats_study_days",
+      "value": "学习天数"
+    },
+    {
+      "name": "stats_streak",
+      "value": "连续打卡"
+    },
+    {
+      "name": "stats_due_review",
+      "value": "今日待复习"
+    },
+    {
+      "name": "stats_mastered",
+      "value": "已掌握节点"
+    },
+    {
+      "name": "stats_total_nodes",
+      "value": "节点总数"
+    },
+    {
+      "name": "stats_mastery_rate",
+      "value": "掌握率"
+    },
+    {
+      "name": "stats_no_map",
+      "value": "打开一张导图即可查看学习统计"
+    },
+    {
+      "name": "wrong_title",
+      "value": "错题 / 生词本"
+    },
+    {
+      "name": "tab_wrong",
+      "value": "错题本"
+    },
+    {
+      "name": "tab_vocab",
+      "value": "生词本"
+    },
+    {
+      "name": "wrong_question",
+      "value": "题目"
+    },
+    {
+      "name": "wrong_answer",
+      "value": "正确答案"
+    },
+    {
+      "name": "wrong_your_answer",
+      "value": "我的作答"
+    },
+    {
+      "name": "wrong_remove",
+      "value": "移除"
+    },
+    {
+      "name": "wrong_empty",
+      "value": "暂无错题"
+    },
+    {
+      "name": "vocab_empty",
+      "value": "暂无收藏的例句"
+    },
+    {
+      "name": "home_study_hub",
+      "value": "学习中心"
+    },
+    {
+      "name": "home_start_study",
+      "value": "开始学习 / 复习"
+    },
+    {
+      "name": "home_stats",
+      "value": "学习统计"
+    },
+    {
+      "name": "home_wrong_book",
+      "value": "错题 · 生词"
+    },
+    {
+      "name": "home_no_map_tip",
+      "value": "请先生成或打开一张导图"
+    },
+    {
+      "name": "home_templates",
+      "value": "考点模板库"
+    },
+    {
+      "name": "template_use",
+      "value": "用模板建图"
+    },
+    {
+      "name": "template_invalid",
+      "value": "模板加载失败，请重试"
+    }
+  ]
+}

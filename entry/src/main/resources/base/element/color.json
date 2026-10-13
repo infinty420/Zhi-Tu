@@ -1,0 +1,96 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "zhitu_primary",
+      "value": "#1677ff"
+    },
+    {
+      "name": "zhitu_primary_light",
+      "value": "#e6f4ff"
+    },
+    {
+      "name": "zhitu_secondary",
+      "value": "#0bd1c0"
+    },
+    {
+      "name": "zhitu_text_primary",
+      "value": "#1a2333"
+    },
+    {
+      "name": "zhitu_text_secondary",
+      "value": "#8a94a6"
+    },
+    {
+      "name": "zhitu_text_on_primary",
+      "value": "#ffffff"
+    },
+    {
+      "name": "zhitu_bg_canvas",
+      "value": "#F7F9FC"
+    },
+    {
+      "name": "zhitu_bg_card",
+      "value": "#ffffff"
+    },
+    {
+      "name": "zhitu_line",
+      "value": "#b8c8dd"
+    },
+    {
+      "name": "zhitu_border",
+      "value": "#e6ebf2"
+    },
+    {
+      "name": "zhitu_selected",
+      "value": "#ffd666"
+    },
+    {
+      "name": "zhitu_hover",
+      "value": "#e6f4ff"
+    },
+    {
+      "name": "zhitu_error",
+      "value": "#f5222d"
+    },
+    {
+      "name": "zhitu_success",
+      "value": "#52c41a"
+    },
+    {
+      "name": "zhitu_agent_bubble",
+      "value": "#f3f8ff"
+    },
+    {
+      "name": "zhitu_node1",
+      "value": "#1677ff"
+    },
+    {
+      "name": "zhitu_node2",
+      "value": "#00b96b"
+    },
+    {
+      "name": "zhitu_node3",
+      "value": "#fa8c16"
+    },
+    {
+      "name": "zhitu_node4",
+      "value": "#722ed1"
+    },
+    {
+      "name": "zhitu_node5",
+      "value": "#eb2f96"
+    },
+    {
+      "name": "zhitu_node6",
+      "value": "#faad14"
+    },
+    {
+      "name": "zhitu_shadow",
+      "value": "#1a233314"
+    }
+  ]
+}

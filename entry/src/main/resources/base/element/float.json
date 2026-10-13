@@ -1,0 +1,68 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "title_font_size",
+      "value": "20fp"
+    },
+    {
+      "name": "nav_title_font_size",
+      "value": "18fp"
+    },
+    {
+      "name": "body_font_size",
+      "value": "15fp"
+    },
+    {
+      "name": "caption_font_size",
+      "value": "12fp"
+    },
+    {
+      "name": "large_font_size",
+      "value": "24fp"
+    },
+    {
+      "name": "node_round_corner",
+      "value": "8vp"
+    },
+    {
+      "name": "card_round_corner",
+      "value": "12vp"
+    },
+    {
+      "name": "button_round_corner",
+      "value": "22vp"
+    },
+    {
+      "name": "dialog_round_corner",
+      "value": "16vp"
+    },
+    {
+      "name": "margin_s",
+      "value": "8vp"
+    },
+    {
+      "name": "margin_m",
+      "value": "16vp"
+    },
+    {
+      "name": "margin_l",
+      "value": "24vp"
+    },
+    {
+      "name": "hit_min_size",
+      "value": "44vp"
+    },
+    {
+      "name": "toolbar_height",
+      "value": "48vp"
+    },
+    {
+      "name": "agent_panel_width",
+      "value": "86%"
+    }
+  ]
+}

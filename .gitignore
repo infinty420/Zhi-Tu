@@ -1,0 +1,27 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+
+# 本地构建日志与临时分析产物
+*.log
+build_*.txt
+zoom_*.png
+nul
+
+# IDE / 本地工具数据
+/.codeartsdoer
+/.merkle-snapshot.json
+/.workbuddy
+
+# AI 密钥：rawfile/ai_config.json 含 apiKey，禁止入库；
+# 克隆后请复制 ai_config.example.json 为 ai_config.json 并填入自己的密钥。
+/entry/src/main/resources/rawfile/ai_config.json
