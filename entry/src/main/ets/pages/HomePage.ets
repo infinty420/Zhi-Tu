@@ -145,448 +145,453 @@ export struct HomePage {
   }
 
   build() {
-    Column({ space: 16 }) {
-      // 顶部品牌区
-      Row() {
-        Text($r('app.string.home_title'))
-          .fontSize($r('app.float.large_font_size'))
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.zhitu_text_primary'))
-        Blank()
-        Button('云端')
-          .fontSize($r('app.float.body_font_size'))
-          .fontColor($r('app.color.zhitu_primary'))
-          .height($r('app.float.hit_min_size'))
-          .backgroundColor(Color.Transparent)
-          .onClick(() => {
-            DeepLinkRouter.push('AccountPage');
-          })
-        Button($r('app.string.home_my_maps'))
-          .fontSize($r('app.float.body_font_size'))
-          .fontColor($r('app.color.zhitu_primary'))
-          .height($r('app.float.hit_min_size'))
-          .backgroundColor(Color.Transparent)
-          .onClick(() => {
-            DeepLinkRouter.push('MyMapsPage');
-          })
-      }
-      .width('100%')
-
-      Text($r('app.string.home_subtitle'))
-        .fontSize($r('app.float.body_font_size'))
-        .fontColor($r('app.color.zhitu_text_secondary'))
-        .width('100%')
-
-      // 打卡角标 + 今日学习进度条（Phase 5.4）
-      Column({ space: 10 }) {
-        Row({ space: 8 }) {
-          Text(this.streakDays > 0 ? `🔥 连续打卡 ${this.streakDays} 天` : '📍 今天还没打卡')
-            .fontSize(14)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#1a2333')
-            .layoutWeight(1)
-          if (this.todayEventCount > 0) {
-            Text(`今日 ${this.todayEventCount} 次学习`)
-              .fontSize(12)
-              .fontColor('#8a94a6')
-          }
-        }
-        .width('100%')
+    Scroll() {
+      Column({ space: 16 }) {
+        // 顶部品牌区
         Row() {
-          Stack() {
-            Rect()
-              .width('100%')
-              .height(10)
-              .radius(5)
-              .fill('#eef1f6')
-            Rect()
-              .width(`${Math.round(this.todayProgress * 100)}%`)
-              .height(10)
-              .radius(5)
-              .fill('#13c2c2')
-          }
-          .width('100%')
-          .height(10)
-        }
-        .width('100%')
-        Text(this.dueReviewCount > 0
-          ? `今日待复习 ${this.dueReviewCount} 个，已完成 ${Math.round(this.todayProgress * 100)}%`
-          : (this.todayProgress >= 1 ? '今日复习已全部完成 🎉' : '今天还没有复习安排，去学一学吧'))
-          .fontSize(12)
-          .fontColor('#8a94a6')
-          .width('100%')
-      }
-      .padding(14)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
-      .width('100%')
-
-      // Wave 7：每日打卡卡
-      Column({ space: 10 }) {
-        Row({ space: 8 }) {
-          Text('📅 每日打卡')
-            .fontSize(15)
+          Text($r('app.string.home_title'))
+            .fontSize($r('app.float.large_font_size'))
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.zhitu_text_primary'))
-            .layoutWeight(1)
-          Text(this.checkInStreak > 0 ? `已连续打卡 ${this.checkInStreak} 天` : '还没开始打卡')
-            .fontSize(12)
-            .fontColor('#8a94a6')
-        }
-        .width('100%')
-        Row({ space: 10 }) {
-          Text(this.checkedInToday
-            ? '今天已打卡，明天再来 ✅'
-            : '打卡记录今天的学习，养成习惯 🔥')
-            .fontSize(13)
-            .fontColor('#1a2333')
-            .layoutWeight(1)
-          Button(this.checkedInToday ? '已打卡' : '今日打卡')
-            .height(34)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor(this.checkedInToday ? '#8a94a6' : '#fa8c16')
-            .enabled(!this.checkedInToday)
+          Blank()
+          Button('云端')
+            .fontSize($r('app.float.body_font_size'))
+            .fontColor($r('app.color.zhitu_primary'))
+            .height($r('app.float.hit_min_size'))
+            .backgroundColor(Color.Transparent)
             .onClick(() => {
-              this.doCheckIn();
+              DeepLinkRouter.push('AccountPage');
             })
-        }
-        .width('100%')
-      }
-      .padding(14)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
-      .width('100%')
-
-      // 输入卡片
-      Column({ space: 12 }) {
-        TextInput({ placeholder: $r('app.string.home_input_placeholder'), text: this.query })
-          .height($r('app.float.hit_min_size'))
-          .onChange((value: string) => {
-            this.query = value;
-          })
-        Row({ space: 8 }) {
-          Text($r('app.string.home_subject_label'))
+          Button($r('app.string.home_my_maps'))
             .fontSize($r('app.float.body_font_size'))
-            .fontColor($r('app.color.zhitu_text_secondary'))
-          Select(this.subjectOptions())
-            .selected(this.selectedSubjectIndex)
-            .value(this.subjectLabels()[this.selectedSubjectIndex])
-            .font({ size: 15 })
-            .onSelect((index: number) => {
-              this.selectedSubjectIndex = index;
+            .fontColor($r('app.color.zhitu_primary'))
+            .height($r('app.float.hit_min_size'))
+            .backgroundColor(Color.Transparent)
+            .onClick(() => {
+              DeepLinkRouter.push('MyMapsPage');
             })
         }
         .width('100%')
 
-        TextInput({ placeholder: $r('app.string.home_book_placeholder'), text: this.book })
-          .height($r('app.float.hit_min_size'))
-          .onChange((value: string) => {
-            this.book = value;
-          })
-
-        Button(this.generating ? $r('app.string.home_generating') : $r('app.string.home_generate'))
-          .width('100%')
-          .height(48)
+        Text($r('app.string.home_subtitle'))
           .fontSize($r('app.float.body_font_size'))
-          .enabled(!this.generating)
-          .backgroundColor($r('app.color.zhitu_primary'))
-          .onClick(() => {
-            this.generate();
-          })
-      }
-      .padding(16)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
-
-      // 生成进度 / 错误区
-      if (this.generating) {
-        Row({ space: 8 }) {
-          LoadingProgress()
-            .width(28)
-            .height(28)
-            .color($r('app.color.zhitu_primary'))
-          Text($r('app.string.home_generating'))
-            .fontSize($r('app.float.body_font_size'))
-            .fontColor($r('app.color.zhitu_text_secondary'))
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.Center)
-      }
-
-      if (this.streamText.length > 0 && !this.generating) {
-        Text(this.streamText.length > 120 ? this.streamText.substring(0, 120) + '…' : this.streamText)
-          .fontSize($r('app.float.caption_font_size'))
           .fontColor($r('app.color.zhitu_text_secondary'))
           .width('100%')
-          .maxLines(3)
-      }
 
-      // 学习中心入口（v1.1 学习闭环）
-      Column({ space: 12 }) {
-        Row({ space: 8 }) {
-          Text($r('app.string.home_study_hub'))
-            .fontSize(15)
-            .fontWeight(FontWeight.Bold)
-            .fontColor($r('app.color.zhitu_text_primary'))
-            .layoutWeight(1)
-          if (this.dueReviewCount > 0) {
-            Text(`今日待复习 ${this.dueReviewCount}`)
-              .fontSize(12)
-              .fontColor('#ffffff')
-              .backgroundColor('#fa8c16')
-              .borderRadius(10)
-              .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-          }
-        }
-        .width('100%')
-
-        Row({ space: 10 }) {
-          this.hubButton($r('app.string.home_start_study'), '#1677ff', () => {
-            if (!this.hasMap) {
-              promptAction.showToast({ message: $r('app.string.home_no_map_tip') });
-              return;
+        // 打卡角标 + 今日学习进度条（Phase 5.4）
+        Column({ space: 10 }) {
+          Row({ space: 8 }) {
+            Text(this.streakDays > 0 ? `🔥 连续打卡 ${this.streakDays} 天` : '📍 今天还没打卡')
+              .fontSize(14)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+              .layoutWeight(1)
+            if (this.todayEventCount > 0) {
+              Text(`今日 ${this.todayEventCount} 次学习`)
+                .fontSize(12)
+                .fontColor('#8a94a6')
             }
-            DeepLinkRouter.pushWithParam('StudyPage', this.store.currentId());
-          })
-          this.hubButton($r('app.string.home_stats'), '#13c2c2', () => {
-            DeepLinkRouter.push('StatsPage');
-          })
-          this.hubButton($r('app.string.home_wrong_book'), '#722ed1', () => {
-            DeepLinkRouter.push('WrongBookPage');
-          })
-        }
-        .width('100%')
-      }
-      .padding(16)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
-      .width('100%')
-
-      // Wave 2：自适应学习路径 · 为你推荐
-      if (this.recommendId.length > 0) {
-        Column({ space: 8 }) {
+          }
+          .width('100%')
           Row() {
-            Text('为你推荐')
+            Stack() {
+              Rect()
+                .width('100%')
+                .height(10)
+                .radius(5)
+                .fill('#eef1f6')
+              Rect()
+                .width(`${Math.round(this.todayProgress * 100)}%`)
+                .height(10)
+                .radius(5)
+                .fill('#13c2c2')
+            }
+            .width('100%')
+            .height(10)
+          }
+          .width('100%')
+          Text(this.dueReviewCount > 0
+            ? `今日待复习 ${this.dueReviewCount} 个，已完成 ${Math.round(this.todayProgress * 100)}%`
+            : (this.todayProgress >= 1 ? '今日复习已全部完成 🎉' : '今天还没有复习安排，去学一学吧'))
+            .fontSize(12)
+            .fontColor('#8a94a6')
+            .width('100%')
+        }
+        .padding(14)
+        .backgroundColor($r('app.color.zhitu_bg_card'))
+        .borderRadius($r('app.float.card_round_corner'))
+        .width('100%')
+
+        // Wave 7：每日打卡卡
+        Column({ space: 10 }) {
+          Row({ space: 8 }) {
+            Text('📅 每日打卡')
               .fontSize(15)
               .fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.zhitu_text_primary'))
               .layoutWeight(1)
-            Button('去学习')
-              .height(30)
+            Text(this.checkInStreak > 0 ? `已连续打卡 ${this.checkInStreak} 天` : '还没开始打卡')
+              .fontSize(12)
+              .fontColor('#8a94a6')
+          }
+          .width('100%')
+          Row({ space: 10 }) {
+            Text(this.checkedInToday
+              ? '今天已打卡，明天再来 ✅'
+              : '打卡记录今天的学习，养成习惯 🔥')
               .fontSize(13)
-              .backgroundColor('#1677ff')
+              .fontColor('#1a2333')
+              .layoutWeight(1)
+            Button(this.checkedInToday ? '已打卡' : '今日打卡')
+              .height(34)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor(this.checkedInToday ? '#8a94a6' : '#fa8c16')
+              .enabled(!this.checkedInToday)
               .onClick(() => {
-                DeepLinkRouter.route(this.recommendId, this.recommendType, this.recommendText);
+                this.doCheckIn();
               })
           }
           .width('100%')
-          Text(this.recommendText)
-            .fontSize(14)
-            .fontColor('#1a2333')
+        }
+        .padding(14)
+        .backgroundColor($r('app.color.zhitu_bg_card'))
+        .borderRadius($r('app.float.card_round_corner'))
+        .width('100%')
+
+        // 输入卡片
+        Column({ space: 12 }) {
+          TextInput({ placeholder: $r('app.string.home_input_placeholder'), text: this.query })
+            .height($r('app.float.hit_min_size'))
+            .onChange((value: string) => {
+              this.query = value;
+            })
+          Row({ space: 8 }) {
+            Text($r('app.string.home_subject_label'))
+              .fontSize($r('app.float.body_font_size'))
+              .fontColor($r('app.color.zhitu_text_secondary'))
+            Select(this.subjectOptions())
+              .selected(this.selectedSubjectIndex)
+              .value(this.subjectLabels()[this.selectedSubjectIndex])
+              .font({ size: 15 })
+              .onSelect((index: number) => {
+                this.selectedSubjectIndex = index;
+              })
+          }
+          .width('100%')
+
+          TextInput({ placeholder: $r('app.string.home_book_placeholder'), text: this.book })
+            .height($r('app.float.hit_min_size'))
+            .onChange((value: string) => {
+              this.book = value;
+            })
+
+          Button(this.generating ? $r('app.string.home_generating') : $r('app.string.home_generate'))
             .width('100%')
-          Text(this.recommendReason)
-            .fontSize(12)
-            .fontColor('#8a94a6')
-            .width('100%')
+            .height(48)
+            .fontSize($r('app.float.body_font_size'))
+            .enabled(!this.generating)
+            .backgroundColor($r('app.color.zhitu_primary'))
+            .onClick(() => {
+              this.generate();
+            })
         }
         .padding(16)
         .backgroundColor($r('app.color.zhitu_bg_card'))
         .borderRadius($r('app.float.card_round_corner'))
-        .width('100%')
-      }
 
-      // Wave 5：今日复习优先级（按掌握度预测排序，Top3）
-      if (this.dueItems.length > 0) {
-        Column({ space: 8 }) {
-          Row() {
-            Text('今日复习优先级')
+        // 生成进度 / 错误区
+        if (this.generating) {
+          Row({ space: 8 }) {
+            LoadingProgress()
+              .width(28)
+              .height(28)
+              .color($r('app.color.zhitu_primary'))
+            Text($r('app.string.home_generating'))
+              .fontSize($r('app.float.body_font_size'))
+              .fontColor($r('app.color.zhitu_text_secondary'))
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Center)
+        }
+
+        if (this.streamText.length > 0 && !this.generating) {
+          Text(this.streamText.length > 120 ? this.streamText.substring(0, 120) + '…' : this.streamText)
+            .fontSize($r('app.float.caption_font_size'))
+            .fontColor($r('app.color.zhitu_text_secondary'))
+            .width('100%')
+            .maxLines(3)
+        }
+
+        // 学习中心入口（v1.1 学习闭环）
+        Column({ space: 12 }) {
+          Row({ space: 8 }) {
+            Text($r('app.string.home_study_hub'))
               .fontSize(15)
               .fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.zhitu_text_primary'))
               .layoutWeight(1)
-            Text(`共 ${this.dueReviewCount} 项待复习`)
-              .fontSize(12)
-              .fontColor('#8a94a6')
+            if (this.dueReviewCount > 0) {
+              Text(`今日待复习 ${this.dueReviewCount}`)
+                .fontSize(12)
+                .fontColor('#ffffff')
+                .backgroundColor('#fa8c16')
+                .borderRadius(10)
+                .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+            }
           }
           .width('100%')
-          ForEach(this.dueItems, (d: DueItem) => {
-            Column({ space: 4 }) {
-              Row({ space: 8 }) {
-                Text(d.text)
-                  .fontSize(14)
-                  .fontColor('#1a2333')
-                  .layoutWeight(1)
-                  .maxLines(1)
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-                if (d.urgent) {
-                  Text('逾期')
-                    .fontSize(11)
-                    .fontColor('#ffffff')
-                    .backgroundColor('#cf1322')
-                    .borderRadius(8)
-                    .padding({ left: 6, right: 6, top: 1, bottom: 1 })
-                }
-                Text(`${d.masteryPct}%`)
-                  .fontSize(12)
-                  .fontColor(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+
+          Row({ space: 10 }) {
+            this.hubButton($r('app.string.home_start_study'), '#1677ff', () => {
+              if (!this.hasMap) {
+                promptAction.showToast({ message: $r('app.string.home_no_map_tip') });
+                return;
               }
-              .width('100%')
-              Stack({ alignContent: Alignment.Start }) {
-                Rect()
-                  .width('100%')
-                  .height(6)
-                  .radius(3)
-                  .fill('#eef1f6')
-                Rect()
-                  .width(`${d.masteryPct}%`)
-                  .height(6)
-                  .radius(3)
-                  .fill(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
-              }
-              .width('100%')
-              .height(6)
-              Button('去复习')
-                .height(26)
-                .fontSize(11)
-                .backgroundColor('#1677ff')
-                .onClick(() => {
-                  DeepLinkRouter.route(d.nodeId, d.type, d.text);
-                })
-            }
-            .padding(12)
-            .backgroundColor('#ffffff')
-            .borderRadius(10)
-            .width('100%')
-          }, (d: DueItem) => d.nodeId)
+              DeepLinkRouter.pushWithParam('StudyPage', this.store.currentId());
+            })
+            this.hubButton($r('app.string.home_stats'), '#13c2c2', () => {
+              DeepLinkRouter.push('StatsPage');
+            })
+            this.hubButton($r('app.string.home_wrong_book'), '#722ed1', () => {
+              DeepLinkRouter.push('WrongBookPage');
+            })
+          }
+          .width('100%')
         }
         .padding(16)
         .backgroundColor($r('app.color.zhitu_bg_card'))
         .borderRadius($r('app.float.card_round_corner'))
         .width('100%')
-      }
 
-      // 一起学入口（v2.0 云端 / 分享 / 市场 / 班级 / 搜索）
-      Column({ space: 10 }) {
-        Text('一起学（v2.0）')
-          .fontSize(15)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.zhitu_text_primary'))
-          .width('100%')
-        Row({ space: 10 }) {
-          Button('分享')
-            .height(40)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor('#1677ff')
-            .layoutWeight(1)
-            .onClick(() => {
-              DeepLinkRouter.push('SharePage');
-            })
-          Button('精品市场')
-            .height(40)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor('#13c2c2')
-            .layoutWeight(1)
-            .onClick(() => {
-              DeepLinkRouter.push('MarketPage');
-            })
-        }
-        .width('100%')
-        Row({ space: 10 }) {
-          Button('我的班级')
-            .height(40)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor('#722ed1')
-            .layoutWeight(1)
-            .onClick(() => {
-              DeepLinkRouter.push('ClassPage');
-            })
-          Button('全局搜索')
-            .height(40)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor('#fa8c16')
-            .layoutWeight(1)
-            .onClick(() => {
-              DeepLinkRouter.push('SearchPage');
-            })
-        }
-        .width('100%')
-        Row({ space: 10 }) {
-          Button('📷 拍照识题')
-            .height(40)
-            .fontSize(14)
-            .fontColor('#ffffff')
-            .backgroundColor('#13c2c2')
-            .layoutWeight(1)
-            .onClick(() => {
-              DeepLinkRouter.push('PhotoQuizPage');
-            })
-        }
-        .width('100%')
-      }
-      .padding(16)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
-      .width('100%')
-
-      // 考点模板库（v1.2 降低空白输入门槛）
-      Column({ space: 10 }) {
-        Text($r('app.string.home_templates'))
-          .fontSize(15)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.zhitu_text_primary'))
-          .width('100%')
-        Column({ space: 8 }) {
-          ForEach(this.templates, (tpl: TemplateItem) => {
-            Row({ space: 10 }) {
-              Column({ space: 2 }) {
-                Text(tpl.title)
-                  .fontSize(14)
-                  .fontColor('#1a2333')
-                  .fontWeight(FontWeight.Medium)
-                Text(tpl.summary)
-                  .fontSize(12)
-                  .fontColor('#8a94a6')
-                  .maxLines(1)
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-              }
-              .layoutWeight(1)
-              .alignItems(HorizontalAlign.Start)
-              Button($r('app.string.template_use'))
+        // Wave 2：自适应学习路径 · 为你推荐
+        if (this.recommendId.length > 0) {
+          Column({ space: 8 }) {
+            Row() {
+              Text('为你推荐')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.zhitu_text_primary'))
+                .layoutWeight(1)
+              Button('去学习')
                 .height(30)
                 .fontSize(13)
                 .backgroundColor('#1677ff')
                 .onClick(() => {
-                  this.useTemplate(tpl.id);
+                  DeepLinkRouter.route(this.recommendId, this.recommendType, this.recommendText);
                 })
             }
-            .padding(12)
-            .backgroundColor('#f3f8ff')
-            .borderRadius(10)
             .width('100%')
-          }, (tpl: TemplateItem) => tpl.id)
+            Text(this.recommendText)
+              .fontSize(14)
+              .fontColor('#1a2333')
+              .width('100%')
+            Text(this.recommendReason)
+              .fontSize(12)
+              .fontColor('#8a94a6')
+              .width('100%')
+          }
+          .padding(16)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
         }
+
+        // Wave 5：今日复习优先级（按掌握度预测排序，Top3）
+        if (this.dueItems.length > 0) {
+          Column({ space: 8 }) {
+            Row() {
+              Text('今日复习优先级')
+                .fontSize(15)
+                .fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.zhitu_text_primary'))
+                .layoutWeight(1)
+              Text(`共 ${this.dueReviewCount} 项待复习`)
+                .fontSize(12)
+                .fontColor('#8a94a6')
+            }
+            .width('100%')
+            ForEach(this.dueItems, (d: DueItem) => {
+              Column({ space: 4 }) {
+                Row({ space: 8 }) {
+                  Text(d.text)
+                    .fontSize(14)
+                    .fontColor('#1a2333')
+                    .layoutWeight(1)
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  if (d.urgent) {
+                    Text('逾期')
+                      .fontSize(11)
+                      .fontColor('#ffffff')
+                      .backgroundColor('#cf1322')
+                      .borderRadius(8)
+                      .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+                  }
+                  Text(`${d.masteryPct}%`)
+                    .fontSize(12)
+                    .fontColor(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+                }
+                .width('100%')
+                Stack({ alignContent: Alignment.Start }) {
+                  Rect()
+                    .width('100%')
+                    .height(6)
+                    .radius(3)
+                    .fill('#eef1f6')
+                  Rect()
+                    .width(`${d.masteryPct}%`)
+                    .height(6)
+                    .radius(3)
+                    .fill(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+                }
+                .width('100%')
+                .height(6)
+                Button('去复习')
+                  .height(26)
+                  .fontSize(11)
+                  .backgroundColor('#1677ff')
+                  .onClick(() => {
+                    DeepLinkRouter.route(d.nodeId, d.type, d.text);
+                  })
+              }
+              .padding(12)
+              .backgroundColor('#ffffff')
+              .borderRadius(10)
+              .width('100%')
+            }, (d: DueItem) => d.nodeId)
+          }
+          .padding(16)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
+        }
+
+        // 一起学入口（v2.0 云端 / 分享 / 市场 / 班级 / 搜索）
+        Column({ space: 10 }) {
+          Text('一起学（v2.0）')
+            .fontSize(15)
+            .fontWeight(FontWeight.Bold)
+            .fontColor($r('app.color.zhitu_text_primary'))
+            .width('100%')
+          Row({ space: 10 }) {
+            Button('分享')
+              .height(40)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor('#1677ff')
+              .layoutWeight(1)
+              .onClick(() => {
+                DeepLinkRouter.push('SharePage');
+              })
+            Button('精品市场')
+              .height(40)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor('#13c2c2')
+              .layoutWeight(1)
+              .onClick(() => {
+                DeepLinkRouter.push('MarketPage');
+              })
+          }
+          .width('100%')
+          Row({ space: 10 }) {
+            Button('我的班级')
+              .height(40)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor('#722ed1')
+              .layoutWeight(1)
+              .onClick(() => {
+                DeepLinkRouter.push('ClassPage');
+              })
+            Button('全局搜索')
+              .height(40)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor('#fa8c16')
+              .layoutWeight(1)
+              .onClick(() => {
+                DeepLinkRouter.push('SearchPage');
+              })
+          }
+          .width('100%')
+          Row({ space: 10 }) {
+            Button('📷 拍照识题')
+              .height(40)
+              .fontSize(14)
+              .fontColor('#ffffff')
+              .backgroundColor('#13c2c2')
+              .layoutWeight(1)
+              .onClick(() => {
+                DeepLinkRouter.push('PhotoQuizPage');
+              })
+          }
+          .width('100%')
+        }
+        .padding(16)
+        .backgroundColor($r('app.color.zhitu_bg_card'))
+        .borderRadius($r('app.float.card_round_corner'))
         .width('100%')
+
+        // 考点模板库（v1.2 降低空白输入门槛）
+        Column({ space: 10 }) {
+          Text($r('app.string.home_templates'))
+            .fontSize(15)
+            .fontWeight(FontWeight.Bold)
+            .fontColor($r('app.color.zhitu_text_primary'))
+            .width('100%')
+          Column({ space: 8 }) {
+            ForEach(this.templates, (tpl: TemplateItem) => {
+              Row({ space: 10 }) {
+                Column({ space: 2 }) {
+                  Text(tpl.title)
+                    .fontSize(14)
+                    .fontColor('#1a2333')
+                    .fontWeight(FontWeight.Medium)
+                  Text(tpl.summary)
+                    .fontSize(12)
+                    .fontColor('#8a94a6')
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+                Button($r('app.string.template_use'))
+                  .height(30)
+                  .fontSize(13)
+                  .backgroundColor('#1677ff')
+                  .onClick(() => {
+                    this.useTemplate(tpl.id);
+                  })
+              }
+              .padding(12)
+              .backgroundColor('#f3f8ff')
+              .borderRadius(10)
+              .width('100%')
+            }, (tpl: TemplateItem) => tpl.id)
+          }
+          .width('100%')
+        }
+        .padding(16)
+        .backgroundColor($r('app.color.zhitu_bg_card'))
+        .borderRadius($r('app.float.card_round_corner'))
+        .width('100%')
+
+
+        Text('输入一个知识点，长出一张会思考的图')
+          .fontSize($r('app.float.caption_font_size'))
+          .fontColor($r('app.color.zhitu_text_secondary'))
       }
-      .padding(16)
-      .backgroundColor($r('app.color.zhitu_bg_card'))
-      .borderRadius($r('app.float.card_round_corner'))
+      .padding($r('app.float.margin_l'))
       .width('100%')
-
-      Blank()
-
-      Text('输入一个知识点，长出一张会思考的图')
-        .fontSize($r('app.float.caption_font_size'))
-        .fontColor($r('app.color.zhitu_text_secondary'))
+      .backgroundColor($r('app.color.zhitu_bg_canvas'))
     }
-    .padding($r('app.float.margin_l'))
+    .align(Alignment.Top)
+    .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring)
     .width('100%')
     .height('100%')
-    .backgroundColor($r('app.color.zhitu_bg_canvas'))
   }
 
   private subjectLabels(): string[] {
