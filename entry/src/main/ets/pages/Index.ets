@@ -14,6 +14,9 @@ import { CloudService } from '../services/CloudService';
 import { ClassService } from '../services/ClassService';
 import { AchievementService } from '../services/AchievementService';
 import { HomePage } from './HomePage';
+import { StudyHubPage } from './StudyHubPage';
+import { CommunityHubPage } from './CommunityHubPage';
+import { MineHubPage } from './MineHubPage';
 import { MindMapPage } from './MindMapPage';
 import { MyMapsPage } from './MyMapsPage';
 import { MathPlotPage } from './MathPlotPage';
@@ -37,6 +40,7 @@ import { NodePage } from './NodePage';
 @Entry
 @Component
 struct Index {
+  @State selectedTab: number = 0;
   private pathStack: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
@@ -122,9 +126,26 @@ struct Index {
     }
   }
 
+  /** 切换分区：更新选中态并清空导航栈，回到目标分区的 Hub 根页 */
+  private switchTab(index: number): void {
+    if (index === this.selectedTab) {
+      return;
+    }
+    this.selectedTab = index;
+    this.pathStack.clear();
+  }
+
   build() {
     Navigation(this.pathStack) {
-      HomePage()
+      if (this.selectedTab === 0) {
+        HomePage({ tabKey: 0, onTabChange: (i: number) => this.switchTab(i) })
+      } else if (this.selectedTab === 1) {
+        StudyHubPage({ tabKey: 1, onTabChange: (i: number) => this.switchTab(i) })
+      } else if (this.selectedTab === 2) {
+        CommunityHubPage({ tabKey: 2, onTabChange: (i: number) => this.switchTab(i) })
+      } else {
+        MineHubPage({ tabKey: 3, onTabChange: (i: number) => this.switchTab(i) })
+      }
     }
     .navDestination(this.pageMap)
     .mode(NavigationMode.Stack)
