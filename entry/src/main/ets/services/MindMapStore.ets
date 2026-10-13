@@ -577,6 +577,7 @@ export class MindMapStore {
     const node = map.findNode(nodeId);
     const mastery: MasteryLevel = correct ? MasteryLevel.KNOWN : MasteryLevel.UNKNOWN;
     if (node) {
+      node.lastReviewedAt = Date.now();
       node.mastery = mastery;
       if (correct) {
         ReviewScheduler.clear(node);
@@ -613,6 +614,7 @@ export class MindMapStore {
       return;
     }
     node.mastery = MasteryLevel.KNOWN;
+    node.lastReviewedAt = Date.now();
     if (node.reviewCount >= ReviewScheduler.INTERVALS.length) {
       ReviewScheduler.clear(node);
     } else {

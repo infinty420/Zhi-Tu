@@ -4,14 +4,37 @@
  */
 import { promptAction } from '@kit.ArkUI';
 import { SUBJECTS, NodeType } from '../model/Constants';
+import { MindMap } from '../model/MindMap';
+import { MindNode } from '../model/MindNode';
 import { getTemplateMindMap, listTemplates, TemplateItem } from '../model/Templates';
 import { AIConfig } from '../services/AIConfig';
 import { AIResultFailure } from '../services/AIService';
 import { AIServiceFactory } from '../services/AIServiceFactory';
 import { MindMapStore } from '../services/MindMapStore';
 import { StudyInsightService } from '../services/StudyInsightService';
+import { ReviewScheduler } from '../services/ReviewScheduler';
+import { MasteryPredictor } from '../services/MasteryPredictor';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { Logger } from '../utils/Logger';
+
+/** 首页待复习优先级卡片项（Wave 5：按掌握度预测排序） */
+interface DueItem {
+  nodeId: string;
+  text: string;
+  type: NodeType;
+  /** 预测掌握度百分比 0~100 */
+  masteryPct: number;
+  /** 是否已逾期 */
+  urgent: boolean;
+}
+
+/** 排序用的中间结构（含节点引用与优先级分） */
+interface DueScored {
+  n: MindNode;
+  pct: number;
+  urgent: boolean;
+  pr: number;
+}
 
 @Component
 export struct HomePage {
@@ -31,6 +54,9 @@ export struct HomePage {
   @State recommendText: string = '';
   @State recommendType: NodeType = NodeType.GENERAL;
   @State recommendReason: string = '';
+
+  // Wave 5：今日复习优先级（按掌握度预测排序，Top3）
+  @State dueItems: DueItem[] = [];
   private store: MindMapStore = MindMapStore.getInstance();
   private templates: TemplateItem[] = listTemplates();
   private unsubscribe: (() => void) | undefined = undefined;
@@ -52,6 +78,7 @@ export struct HomePage {
   private refreshHub(): void {
     this.hasMap = this.store.hasCurrent();
     this.dueReviewCount = this.store.dueReviewCount();
+    const now = Date.now();
     const stats = this.store.getStudyStats();
     this.streakDays = stats.streakDays;
     this.todayEventCount = stats.todayEventCount;
@@ -72,6 +99,33 @@ export struct HomePage {
       this.recommendText = '';
       this.recommendReason = '';
     }
+    // Wave 5：对待复习节点按「紧急度 × 重要度 + 遗忘风险」排序，取前 3
+    this.dueItems = this.computeDueItems(snap, now);
+  }
+
+  private computeDueItems(snap: MindMap | undefined, now: number): DueItem[] {
+    if (!snap) {
+      return [];
+    }
+    const due = ReviewScheduler.dueNodes(snap);
+    if (due.length === 0) {
+      return [];
+    }
+    const scored: DueScored[] = [];
+    for (let i = 0; i < due.length; i++) {
+      const n: MindNode = due[i];
+      const pct = Math.round(MasteryPredictor.masteryScore(n, now) * 100);
+      const urgent = n.nextReviewAt > 0 && n.nextReviewAt <= now;
+      scored.push({ n: n, pct: pct, urgent: urgent, pr: MasteryPredictor.priority(n, now) });
+    }
+    scored.sort((a: DueScored, b: DueScored) => b.pr - a.pr);
+    const max = Math.min(3, scored.length);
+    const out: DueItem[] = [];
+    for (let i = 0; i < max; i++) {
+      const s = scored[i];
+      out.push({ nodeId: s.n.id, text: s.n.text, type: s.n.type, masteryPct: s.pct, urgent: s.urgent });
+    }
+    return out;
   }
 
   build() {
@@ -282,6 +336,76 @@ export struct HomePage {
             .fontSize(12)
             .fontColor('#8a94a6')
             .width('100%')
+        }
+        .padding(16)
+        .backgroundColor($r('app.color.zhitu_bg_card'))
+        .borderRadius($r('app.float.card_round_corner'))
+        .width('100%')
+      }
+
+      // Wave 5：今日复习优先级（按掌握度预测排序，Top3）
+      if (this.dueItems.length > 0) {
+        Column({ space: 8 }) {
+          Row() {
+            Text('今日复习优先级')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor($r('app.color.zhitu_text_primary'))
+              .layoutWeight(1)
+            Text(`共 ${this.dueReviewCount} 项待复习`)
+              .fontSize(12)
+              .fontColor('#8a94a6')
+          }
+          .width('100%')
+          ForEach(this.dueItems, (d: DueItem) => {
+            Column({ space: 4 }) {
+              Row({ space: 8 }) {
+                Text(d.text)
+                  .fontSize(14)
+                  .fontColor('#1a2333')
+                  .layoutWeight(1)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                if (d.urgent) {
+                  Text('逾期')
+                    .fontSize(11)
+                    .fontColor('#ffffff')
+                    .backgroundColor('#cf1322')
+                    .borderRadius(8)
+                    .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+                }
+                Text(`${d.masteryPct}%`)
+                  .fontSize(12)
+                  .fontColor(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+              }
+              .width('100%')
+              Stack({ alignContent: Alignment.Start }) {
+                Rect()
+                  .width('100%')
+                  .height(6)
+                  .radius(3)
+                  .fill('#eef1f6')
+                Rect()
+                  .width(`${d.masteryPct}%`)
+                  .height(6)
+                  .radius(3)
+                  .fill(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+              }
+              .width('100%')
+              .height(6)
+              Button('去复习')
+                .height(26)
+                .fontSize(11)
+                .backgroundColor('#1677ff')
+                .onClick(() => {
+                  DeepLinkRouter.route(d.nodeId, d.type, d.text);
+                })
+            }
+            .padding(12)
+            .backgroundColor('#ffffff')
+            .borderRadius(10)
+            .width('100%')
+          }, (d: DueItem) => d.nodeId)
         }
         .padding(16)
         .backgroundColor($r('app.color.zhitu_bg_card'))

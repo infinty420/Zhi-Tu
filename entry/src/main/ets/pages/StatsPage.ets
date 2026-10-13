@@ -9,7 +9,16 @@ import { StudyStats } from '../model/StudyModels';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { StudyInsightService, WeakPointItem, SubjectWeakProfile } from '../services/StudyInsightService';
 import { StudyReportService, StudyReport } from '../services/StudyReportService';
+import { MasteryPredictor } from '../services/MasteryPredictor';
 import { AccountService } from '../services/AccountService';
+
+/** 记忆保持预测项（Wave 5：保持率越低越该复习） */
+interface RetainItem {
+  nodeId: string;
+  text: string;
+  /** 当前记忆保持率百分比 0~100 */
+  retainPct: number;
+}
 
 @Component
 export struct StatsPage {
@@ -30,6 +39,8 @@ export struct StatsPage {
   // Wave 4：学情报告（周报 / 月报，家长视角）
   @State report: StudyReport | undefined = undefined;
   @State reportDays: number = 7;
+  // Wave 5：记忆保持预测（按保持率升序，最易忘的优先）
+  @State retainItems: RetainItem[] = [];
   private store: MindMapStore = MindMapStore.getInstance();
   private unsubscribe: (() => void) | undefined = undefined;
 
@@ -50,15 +61,28 @@ export struct StatsPage {
   private refresh(): void {
     this.stats = this.store.getStudyStats();
     this.hasMap = this.store.hasCurrent();
+    const now = Date.now();
     const snap = this.store.currentSnapshot();
     if (snap) {
       const all = StudyInsightService.buildWeakPoints(snap, this.store.getWrongItems());
       // 只展示最薄弱的前 5 个，避免长列表
       this.weak = all.length > 5 ? all.slice(0, 5) : all;
       this.profile = StudyInsightService.buildSubjectProfile(snap, all);
+      // Wave 5：记忆保持预测 —— 已复习过的节点按保持率升序，取最易忘的前 6
+      const list: RetainItem[] = [];
+      for (let i = 0; i < snap.nodes.length; i++) {
+        const n = snap.nodes[i];
+        if (n.lastReviewedAt > 0) {
+          const pct = Math.round(MasteryPredictor.retention(n, now) * 100);
+          list.push({ nodeId: n.id, text: n.text, retainPct: pct });
+        }
+      }
+      list.sort((a: RetainItem, b: RetainItem) => a.retainPct - b.retainPct);
+      this.retainItems = list.length > 6 ? list.slice(0, 6) : list;
     } else {
       this.weak = [];
       this.profile = [];
+      this.retainItems = [];
     }
     this.report = StudyReportService.build(this.store.getLearningEvents(), this.store.getWrongItems(), this.reportDays);
   }
@@ -252,6 +276,53 @@ export struct StatsPage {
               .backgroundColor('#ffffff')
               .borderRadius(10)
             }, (w: WeakPointItem) => w.nodeId)
+          }
+          .padding({ left: 16, right: 16 })
+          .width('100%')
+        }
+
+        // Wave 5：记忆保持预测（保持率越低越该复习）
+        if (this.retainItems.length > 0) {
+          Column({ space: 10 }) {
+            Text('记忆保持预测')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1a2333')
+              .width('100%')
+            ForEach(this.retainItems, (r: RetainItem) => {
+              Column({ space: 4 }) {
+                Row({ space: 8 }) {
+                  Text(r.text)
+                    .fontSize(13)
+                    .fontColor('#1a2333')
+                    .layoutWeight(1)
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  Text(`${r.retainPct}%`)
+                    .fontSize(12)
+                    .fontColor(r.retainPct >= 70 ? '#52c41a' : (r.retainPct >= 40 ? '#fa8c16' : '#cf1322'))
+                }
+                .width('100%')
+                Stack({ alignContent: Alignment.Start }) {
+                  Rect()
+                    .width('100%')
+                    .height(6)
+                    .radius(3)
+                    .fill('#eef1f6')
+                  Rect()
+                    .width(`${r.retainPct}%`)
+                    .height(6)
+                    .radius(3)
+                    .fill(r.retainPct >= 70 ? '#52c41a' : (r.retainPct >= 40 ? '#fa8c16' : '#cf1322'))
+                }
+                .width('100%')
+                .height(6)
+              }
+              .padding(10)
+              .backgroundColor('#ffffff')
+              .borderRadius(10)
+              .width('100%')
+            }, (r: RetainItem) => r.nodeId)
           }
           .padding({ left: 16, right: 16 })
           .width('100%')
