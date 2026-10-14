@@ -267,34 +267,48 @@ export struct HomePage {
               .fontColor($r('app.color.zhitu_text_primary'))
               .width('100%')
             Column({ space: 8 }) {
-              ForEach(this.templates, (tpl: TemplateItem) => {
-                Row({ space: 10 }) {
-                  Column({ space: 2 }) {
-                    Text(tpl.title)
-                      .fontSize(14)
-                      .fontColor('#1a2333')
-                      .fontWeight(FontWeight.Medium)
-                    Text(tpl.summary)
-                      .fontSize(12)
-                      .fontColor('#8a94a6')
-                      .maxLines(1)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  }
-                  .layoutWeight(1)
-                  .alignItems(HorizontalAlign.Start)
-                  Button($r('app.string.template_use'))
-                    .height(30)
-                    .fontSize(13)
-                    .backgroundColor('#1677ff')
+              Text('轻点卡片，一键生成导图')
+                .fontSize(11)
+                .fontColor('#a0a8ba')
+                .width('100%')
+              Grid() {
+                ForEach(this.templates, (tpl: TemplateItem) => {
+                  GridItem() {
+                    Column({ space: 6 }) {
+                      Row({ space: 5 }) {
+                        Circle({ width: 6, height: 6 }).fill(this.subjectColor(tpl.subject))
+                        Text(tpl.subject)
+                          .fontSize(11)
+                          .fontColor(this.subjectColor(tpl.subject))
+                          .fontWeight(FontWeight.Medium)
+                      }
+                      Text(tpl.title)
+                        .fontSize(13)
+                        .fontColor('#1a2333')
+                        .fontWeight(FontWeight.Medium)
+                        .maxLines(2)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .lineHeight(17)
+                    }
+                    .alignItems(HorizontalAlign.Start)
+                    .justifyContent(FlexAlign.Start)
+                    .padding(12)
+                    .backgroundColor('#f7f9fc')
+                    .borderRadius(12)
+                    .width('100%')
+                    .height(86)
                     .onClick(() => {
                       this.useTemplate(tpl.id);
                     })
-                }
-                .padding(12)
-                .backgroundColor('#f3f8ff')
-                .borderRadius(10)
-                .width('100%')
-              }, (tpl: TemplateItem) => tpl.id)
+                  }
+                }, (tpl: TemplateItem) => tpl.id)
+              }
+              .columnsTemplate('1fr 1fr')
+              .columnsGap(10)
+              .rowsGap(10)
+              .height(370)
+              .width('100%')
+              .scrollBar(BarState.Off)
             }
             .width('100%')
           }
@@ -384,6 +398,21 @@ export struct HomePage {
   }
 
   /** 模板一键建图：以模板导图新建（不覆盖已有），跳转编辑页 */
+  /** 学科标签配色（模板卡片用） */
+  private subjectColor(subject: string): string {
+    const colors: Record<string, string> = {
+      '语文': '#d4537e',
+      '数学': '#1677ff',
+      '英语': '#7b61ff',
+      '物理': '#13c2c2',
+      '化学': '#52c41a',
+      '生物': '#38b000',
+      '历史': '#fa8c16',
+      '地理': '#0ea5e9'
+    };
+    return colors[subject] ?? '#1677ff';
+  }
+
   private useTemplate(id: string): void {
     const map = getTemplateMindMap(id);
     if (!map) {
