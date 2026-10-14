@@ -13,7 +13,7 @@ export struct CommunityHubPage {
   build() {
     Column() {
       Scroll() {
-        Column({ space: 16 }) {
+        Column({ space: 14 }) {
           Text('一起学')
             .fontSize($r('app.float.large_font_size'))
             .fontWeight(FontWeight.Bold)
@@ -24,21 +24,61 @@ export struct CommunityHubPage {
             .fontColor($r('app.color.zhitu_text_secondary'))
             .width('100%')
 
+          // 分享 banner（强调态）
+          Row({ space: 12 }) {
+            Column() {
+              Text('分')
+                .fontSize(15)
+                .fontWeight(FontWeight.Medium)
+                .fontColor('#1677ff')
+            }
+            .width(38)
+            .height(38)
+            .borderRadius(11)
+            .backgroundColor('#e6f1fb')
+            .align(Alignment.Center)
+            Column({ space: 2 }) {
+              Text('分享导图，解锁班级排行')
+                .fontSize(14)
+                .fontWeight(FontWeight.Medium)
+                .fontColor('#1a2333')
+              Text('把你的学习成果分享到班级与社区')
+                .fontSize(11)
+                .fontColor('#8a94a6')
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+            Button('去分享')
+              .height(32)
+              .fontSize(13)
+              .fontColor('#ffffff')
+              .backgroundColor('#1677ff')
+              .onClick(() => {
+                DeepLinkRouter.push('SharePage');
+              })
+          }
+          .padding(14)
+          .backgroundColor('#f2f8ff')
+          .borderRadius(14)
+          .border({ width: 0.5, color: '#b8d8fb' })
+          .width('100%')
+
+          // 四个入口（2x2 图标卡网格）
           Column({ space: 10 }) {
             Row({ space: 10 }) {
-              this.tile('精品市场', '#13c2c2', () => {
+              this.communityTile('精品市场', '优质模板', '市', '#0f6e56', '#e1f5ee', false, () => {
                 DeepLinkRouter.push('MarketPage');
               })
-              this.tile('我的班级', '#722ed1', () => {
+              this.communityTile('我的班级', '学情排行', '班', '#722ed1', '#eeedfe', false, () => {
                 DeepLinkRouter.push('ClassPage');
               })
             }
             .width('100%')
             Row({ space: 10 }) {
-              this.tile('全局搜索', '#fa8c16', () => {
+              this.communityTile('全局搜索', '找好图', '搜', '#854f0b', '#faeeda', false, () => {
                 DeepLinkRouter.push('SearchPage');
               })
-              this.tile('分享导图', '#1677ff', () => {
+              this.communityTile('分享导图', '一键分享', '享', '#1677ff', '#e6f1fb', true, () => {
                 DeepLinkRouter.push('SharePage');
               })
             }
@@ -71,18 +111,40 @@ export struct CommunityHubPage {
   }
 
   @Builder
-  tile(label: string, color: string, onTap: () => void) {
-    Column({ space: 4 }) {
-      Text(label)
-        .fontSize(15)
-        .fontColor('#ffffff')
+  communityTile(label: string, sub: string, glyph: string, color: string, tint: string, emphasize: boolean, onTap: () => void) {
+    Row({ space: 10 }) {
+      Column() {
+        Text(glyph)
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(color)
+      }
+      .width(34)
+      .height(34)
+      .borderRadius(10)
+      .backgroundColor(tint)
+      .align(Alignment.Center)
+      Column({ space: 1 }) {
+        Text(label)
+          .fontSize(13)
+          .fontWeight(FontWeight.Medium)
+          .fontColor('#1a2333')
+        Text(sub)
+          .fontSize(11)
+          .fontColor('#8a94a6')
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      Text('›')
+        .fontSize(14)
+        .fontColor('#b4b2a9')
     }
-    .height(64)
-    .padding({ left: 14, right: 14, top: 12, bottom: 12 })
-    .backgroundColor(color)
+    .padding(12)
+    .backgroundColor(emphasize ? '#f2f8ff' : '#f3f4f6')
     .borderRadius(12)
+    .border(emphasize ? { width: 1, color: '#1677ff' } : { width: 0.5, color: '#e5e8ef' })
     .layoutWeight(1)
-    .alignItems(HorizontalAlign.Center)
+    .alignItems(VerticalAlign.Center)
     .onClick(onTap)
   }
 }

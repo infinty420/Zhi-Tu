@@ -120,8 +120,8 @@ export struct StudyHubPage {
             .fontColor($r('app.color.zhitu_text_primary'))
             .width('100%')
 
-          // 今日进度 banner
-          Column({ space: 10 }) {
+          // 今日进度 banner（hero 指标卡）
+          Column({ space: 12 }) {
             Row({ space: 8 }) {
               Text(this.streakDays > 0 ? `🔥 连续打卡 ${this.streakDays} 天` : '📍 今天还没打卡')
                 .fontSize(14)
@@ -135,6 +135,14 @@ export struct StudyHubPage {
               }
             }
             .width('100%')
+            // 三项指标
+            Row({ space: 8 }) {
+              this.statBlock(`${this.dueReviewCount}`, '待复习')
+              this.statBlock(`${this.todayEventCount}`, '今日已学')
+              this.statBlock(`${this.streakDays}`, '连续(天)')
+            }
+            .width('100%')
+            // 进度条
             Row() {
               Stack() {
                 Rect()
@@ -209,17 +217,17 @@ export struct StudyHubPage {
               .fontColor($r('app.color.zhitu_text_primary'))
               .width('100%')
             Row({ space: 10 }) {
-              this.tile('开始学习', '#1677ff', () => {
+              this.toolTile('开始学习', '学', '#1677ff', '#e6f1fb', () => {
                 if (!this.hasMap) {
                   promptAction.showToast({ message: $r('app.string.home_no_map_tip') });
                   return;
                 }
                 DeepLinkRouter.pushWithParam('StudyPage', this.store.currentId());
               })
-              this.tile('学习统计', '#13c2c2', () => {
+              this.toolTile('学习统计', '统', '#0f6e56', '#e1f5ee', () => {
                 DeepLinkRouter.push('StatsPage');
               })
-              this.tile('错题本', '#722ed1', () => {
+              this.toolTile('错题本', '错', '#722ed1', '#eeedfe', () => {
                 DeepLinkRouter.push('WrongBookPage');
               })
             }
@@ -248,13 +256,13 @@ export struct StudyHubPage {
             .width('100%')
             if (!this.focusing) {
               Row({ space: 10 }) {
-                this.tile('专注 15 分', '#fa8c16', () => {
+                this.toolTile('专注 15 分', '15', '#fa8c16', '#faeedf', () => {
                   this.startFocus(15);
                 })
-                this.tile('专注 25 分', '#fa8c16', () => {
+                this.toolTile('专注 25 分', '25', '#fa8c16', '#faeedf', () => {
                   this.startFocus(25);
                 })
-                this.tile('专注 45 分', '#fa8c16', () => {
+                this.toolTile('专注 45 分', '45', '#fa8c16', '#faeedf', () => {
                   this.startFocus(45);
                 })
               }
@@ -294,53 +302,32 @@ export struct StudyHubPage {
               }
               .width('100%')
               ForEach(this.dueItems, (d: DueItem) => {
-                Column({ space: 4 }) {
-                  Row({ space: 8 }) {
-                    Text(d.text)
-                      .fontSize(14)
-                      .fontColor('#1a2333')
-                      .layoutWeight(1)
-                      .maxLines(1)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    if (d.urgent) {
-                      Text('逾期')
-                        .fontSize(11)
-                        .fontColor('#ffffff')
-                        .backgroundColor('#cf1322')
-                        .borderRadius(8)
-                        .padding({ left: 6, right: 6, top: 1, bottom: 1 })
-                    }
-                    Text(`${d.masteryPct}%`)
-                      .fontSize(12)
-                      .fontColor(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
+                Row({ space: 8 }) {
+                  Text(d.text)
+                    .fontSize(14)
+                    .fontColor('#1a2333')
+                    .layoutWeight(1)
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  if (d.urgent) {
+                    Text('逾期')
+                      .fontSize(11)
+                      .fontColor('#ffffff')
+                      .backgroundColor('#cf1322')
+                      .borderRadius(8)
+                      .padding({ left: 6, right: 6, top: 1, bottom: 1 })
                   }
-                  .width('100%')
-                  Stack({ alignContent: Alignment.Start }) {
-                    Rect()
-                      .width('100%')
-                      .height(6)
-                      .radius(3)
-                      .fill('#eef1f6')
-                    Rect()
-                      .width(`${d.masteryPct}%`)
-                      .height(6)
-                      .radius(3)
-                      .fill(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
-                  }
-                  .width('100%')
-                  .height(6)
-                  Button('去复习')
-                    .height(26)
-                    .fontSize(11)
-                    .backgroundColor('#1677ff')
-                    .onClick(() => {
-                      DeepLinkRouter.route(d.nodeId, d.type, d.text);
-                    })
+                  Text(`${d.masteryPct}%`)
+                    .fontSize(12)
+                    .fontColor(d.masteryPct >= 70 ? '#52c41a' : (d.masteryPct >= 40 ? '#fa8c16' : '#cf1322'))
                 }
+                .width('100%')
                 .padding(12)
                 .backgroundColor('#ffffff')
                 .borderRadius(10)
-                .width('100%')
+                .onClick(() => {
+                  DeepLinkRouter.route(d.nodeId, d.type, d.text);
+                })
               }, (d: DueItem) => d.nodeId)
             }
             .padding(16)
@@ -498,14 +485,42 @@ export struct StudyHubPage {
   }
 
   @Builder
-  tile(label: string, color: string, onTap: () => void) {
-    Column({ space: 4 }) {
+  statBlock(value: string, label: string) {
+    Column({ space: 2 }) {
+      Text(value)
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .fontColor($r('app.color.zhitu_text_primary'))
       Text(label)
-        .fontSize(14)
-        .fontColor('#ffffff')
+        .fontSize(11)
+        .fontColor('#8a94a6')
     }
-    .padding({ left: 14, right: 14, top: 12, bottom: 12 })
-    .backgroundColor(color)
+    .alignItems(HorizontalAlign.Center)
+    .layoutWeight(1)
+  }
+
+  @Builder
+  toolTile(label: string, glyph: string, color: string, tint: string, onTap: () => void) {
+    Column({ space: 8 }) {
+      Column() {
+        Text(glyph)
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(color)
+      }
+      .width(40)
+      .height(40)
+      .borderRadius(12)
+      .backgroundColor(tint)
+      .align(Alignment.Center)
+      Text(label)
+        .fontSize(12)
+        .fontColor('#1a2333')
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+    }
+    .padding(10)
+    .backgroundColor('#f3f4f6')
     .borderRadius(12)
     .layoutWeight(1)
     .alignItems(HorizontalAlign.Center)

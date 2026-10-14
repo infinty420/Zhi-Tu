@@ -37,6 +37,10 @@ export struct HomePage {
   // Wave 12：跨设备续学（上次学习会话）
   @State continueSession: ContinueSession | undefined = undefined;
 
+  // 品牌区当日小结
+  @State dueReviewCount: number = 0;
+  @State streakDays: number = 0;
+
   private store: MindMapStore = MindMapStore.getInstance();
   private templates: TemplateItem[] = listTemplates();
   private unsubscribe: (() => void) | undefined = undefined;
@@ -58,6 +62,9 @@ export struct HomePage {
   private refreshHub(): void {
     this.hasMap = this.store.hasCurrent();
     this.continueSession = ContinueService.getInstance().get();
+    const stats = this.store.getStudyStats();
+    this.dueReviewCount = stats.dueReviewCount;
+    this.streakDays = stats.streakDays;
     const snap = this.store.currentSnapshot();
     const next = snap ? StudyInsightService.recommendNext(snap, this.store.getWrongItems()) : undefined;
     if (next) {
@@ -87,56 +94,62 @@ export struct HomePage {
             .fontColor($r('app.color.zhitu_text_secondary'))
             .width('100%')
 
-          // Wave 12：继续上次学习（跨设备续学入口）
+          // 品牌区当日小结（指标胶囊）
+          Row({ space: 16 }) {
+            this.metricItem(`${this.dueReviewCount}`, '今日待复习')
+            this.metricDivider()
+            this.metricItem(`${this.streakDays}`, '连续学习(天)')
+            this.metricDivider()
+            this.metricItem(`${this.hasMap ? 1 : 0}`, '当前导图')
+          }
+          .padding(12)
+          .backgroundColor($r('app.color.zhitu_bg_card'))
+          .borderRadius($r('app.float.card_round_corner'))
+          .width('100%')
+
+          // Wave 12：继续上次学习（压缩为顶部胶囊，可点续学）
           if (this.continueSession) {
-            Column({ space: 8 }) {
-              Row({ space: 8 }) {
-                Text('🔁 继续上次学习')
-                  .fontSize(15)
-                  .fontWeight(FontWeight.Bold)
-                  .fontColor($r('app.color.zhitu_text_primary'))
-                  .layoutWeight(1)
-                Text(this.relTime(this.continueSession.ts))
-                  .fontSize(12)
-                  .fontColor('#8a94a6')
+            Row({ space: 10 }) {
+              Column() {
+                Text('↻')
+                  .fontSize(14)
+                  .fontColor('#13c2c2')
               }
-              .width('100%')
-              Text(this.continueSession.title)
-                .fontSize(14)
-                .fontColor('#1a2333')
-                .fontWeight(FontWeight.Medium)
-                .width('100%')
-              if (this.continueSession.nodeText.length > 0) {
-                Text(`上次停留：${this.continueSession.nodeText}`)
-                  .fontSize(12)
-                  .fontColor('#4a5468')
+              .width(30)
+              .height(30)
+              .borderRadius(15)
+              .backgroundColor('#e6fffb')
+              .align(Alignment.Center)
+              Column({ space: 1 }) {
+                Text(`继续《${this.continueSession.title}》`)
+                  .fontSize(13)
+                  .fontColor('#1a2333')
+                  .fontWeight(FontWeight.Medium)
                   .maxLines(1)
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  .width('100%')
+                if (this.continueSession.nodeText.length > 0) {
+                  Text(`上次：${this.continueSession.nodeText}`)
+                    .fontSize(11)
+                    .fontColor('#8a94a6')
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                }
               }
-              Row({ space: 10 }) {
-                Button('继续学习')
-                  .layoutWeight(1)
-                  .height(38)
-                  .fontSize(14)
-                  .backgroundColor('#13c2c2')
-                  .onClick(() => {
-                    this.resumeLast();
-                  })
-                Button('清除记录')
-                  .height(38)
-                  .fontSize(13)
-                  .fontColor('#8a94a6')
-                  .backgroundColor('#f3f4f6')
-                  .onClick(() => {
-                    this.clearContinue();
-                  })
-              }
-              .width('100%')
+              .layoutWeight(1)
+              .alignItems(HorizontalAlign.Start)
+              Button('继续')
+                .height(30)
+                .fontSize(13)
+                .fontColor('#13c2c2')
+                .backgroundColor('#e6fffb')
+                .onClick(() => {
+                  this.resumeLast();
+                })
             }
-            .padding(16)
-            .backgroundColor('#e6fffb')
-            .borderRadius($r('app.float.card_round_corner'))
+            .padding(12)
+            .backgroundColor('#f3fffd')
+            .borderRadius(12)
+            .border({ width: 0.5, color: '#b8f0e6' })
             .width('100%')
           }
 
@@ -237,22 +250,16 @@ export struct HomePage {
             .width('100%')
           }
 
-          // 智能创作：拍照识题
-          Column({ space: 10 }) {
+          // 智能创作：拍摄识别入口（图标卡）
+          Column({ space: 8 }) {
             Text('智能创作')
               .fontSize(15)
               .fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.zhitu_text_primary'))
               .width('100%')
-            Button('📷 拍照识题')
-              .width('100%')
-              .height(40)
-              .fontSize(14)
-              .fontColor('#ffffff')
-              .backgroundColor('#13c2c2')
-              .onClick(() => {
-                DeepLinkRouter.push('PhotoQuizPage');
-              })
+            this.iconCard('拍照识题', '拍下题目，秒出导图', '摄', '#0f6e56', '#e1f5ee', () => {
+              DeepLinkRouter.push('PhotoQuizPage');
+            })
           }
           .padding(16)
           .backgroundColor($r('app.color.zhitu_bg_card'))
@@ -397,7 +404,6 @@ export struct HomePage {
     return options;
   }
 
-  /** 模板一键建图：以模板导图新建（不覆盖已有），跳转编辑页 */
   /** 学科标签配色（模板卡片用） */
   private subjectColor(subject: string): string {
     const colors: Record<string, string> = {
@@ -411,6 +417,65 @@ export struct HomePage {
       '地理': '#0ea5e9'
     };
     return colors[subject] ?? '#1677ff';
+  }
+
+  @Builder
+  metricItem(value: string, label: string) {
+    Column({ space: 2 }) {
+      Text(value)
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .fontColor($r('app.color.zhitu_text_primary'))
+      Text(label)
+        .fontSize(11)
+        .fontColor('#8a94a6')
+    }
+    .alignItems(HorizontalAlign.Center)
+  }
+
+  @Builder
+  metricDivider() {
+    Column()
+      .width(0.5)
+      .height(28)
+      .backgroundColor('#e5e8ef')
+  }
+
+  @Builder
+  iconCard(label: string, sub: string, glyph: string, color: string, tint: string, onTap: () => void) {
+    Row({ space: 10 }) {
+      Column() {
+        Text(glyph)
+          .fontSize(13)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(color)
+      }
+      .width(34)
+      .height(34)
+      .borderRadius(9)
+      .backgroundColor(tint)
+      .align(Alignment.Center)
+      Column({ space: 1 }) {
+        Text(label)
+          .fontSize(13)
+          .fontWeight(FontWeight.Medium)
+          .fontColor('#1a2333')
+        Text(sub)
+          .fontSize(11)
+          .fontColor('#8a94a6')
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      Text('›')
+        .fontSize(14)
+        .fontColor('#b4b2a9')
+    }
+    .padding(12)
+    .backgroundColor('#f3f4f6')
+    .borderRadius(12)
+    .width('100%')
+    .alignItems(VerticalAlign.Center)
+    .onClick(onTap)
   }
 
   private useTemplate(id: string): void {
