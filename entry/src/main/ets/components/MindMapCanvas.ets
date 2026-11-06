@@ -9,7 +9,7 @@ import { image } from '@kit.ImageKit';
 import { THEME_COLORS } from '../model/Constants';
 import { MindMap } from '../model/MindMap';
 import { LayoutEngine, LayoutResult, TreeNodeLayout } from '../engine/LayoutEngine';
-import { Camera2D, MindNodeView, ScreenBox } from './MindNodeView';
+import { Camera2D, MindNodeView } from './MindNodeView';
 import { MindMapStore } from '../services/MindMapStore';
 
 export class MindMapCanvasController {

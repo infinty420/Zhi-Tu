@@ -9,7 +9,6 @@
  * 方向约束：未新增弹窗/动效/主题/NavDestination/依赖；复用 FuncParser 与现有 store。
  */
 import { promptAction } from '@kit.ArkUI';
-import { common } from '@kit.AbilityKit';
 import { MasteryLevel, NodeType } from '../model/Constants';
 import { MindNode, NodeLink, NodeRichContent, KeyPointItem, FormulaItem, FormulaVar, RichExampleItem, MisconceptionItem, KeyPointLevel, emptyNodeRichContent } from '../model/MindNode';
 import { MindMap } from '../model/MindMap';
@@ -17,7 +16,7 @@ import { VocabItem } from '../model/StudyModels';
 import { MindMapStore } from '../services/MindMapStore';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { QAService, QAAnswer } from '../services/QAService';
-import { AIService, TutorMode, TutorChunk, QuizQuestion, SimilarQuizRequest } from '../services/AIService';
+import { AIService, TutorMode, TutorChunk, QuizQuestion } from '../services/AIService';
 import { AIServiceFactory } from '../services/AIServiceFactory';
 import { AIConfig } from '../services/AIConfig';
 import { TtsService } from '../services/TtsService';

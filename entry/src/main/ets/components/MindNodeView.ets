@@ -9,7 +9,7 @@
  *   - 文字在节点内居中绘制，盒子部分移出屏幕左侧时不再整段被裁掉；
  *   - 不再用 camera.scale 阈值卡掉文字，所有布局类型一致出字。
  */
-import { MasteryLevel, NodeShape, NodeType } from '../model/Constants';
+import { MasteryLevel, NodeShape } from '../model/Constants';
 import { MindNode } from '../model/MindNode';
 import { MindMap } from '../model/MindMap';
 import { LayoutEngine, TreeNodeLayout } from '../engine/LayoutEngine';

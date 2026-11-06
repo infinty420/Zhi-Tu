@@ -3,7 +3,6 @@
  * 展示学习天数、连续打卡、掌握节点数、掌握率、今日待复习，数据来自 StorageService 聚合。
  */
 
-import { promptAction } from '@kit.ArkUI';
 import { MindMapStore } from '../services/MindMapStore';
 import { StudyStats } from '../model/StudyModels';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';

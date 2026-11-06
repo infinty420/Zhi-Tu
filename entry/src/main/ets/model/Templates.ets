@@ -4,7 +4,7 @@
  * 模板以 MindMap 实体返回，保证结构合法、向后兼容。
  */
 
-import { Layout, NodeType } from './Constants';
+import { NodeType } from './Constants';
 import { MindMap } from './MindMap';
 import { MindNode } from './MindNode';
 import { GenUid } from '../utils/GenUid';

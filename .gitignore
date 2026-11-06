@@ -21,6 +21,7 @@ nul
 /.codeartsdoer
 /.merkle-snapshot.json
 /.workbuddy
+/.arts
 
 # AI 配置：rawfile/ai_config.json 随仓库一起提交（便于直接运行）；
 # apiKey 为空时应用自动回退到 Mock 模式，需要真实模型时自行填入。

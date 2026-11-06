@@ -2,11 +2,6 @@
  * BottomTabBar —— 底部分区导航栏（Wave 9）。
  * 复用于四个分区 Hub 页底部：选中态高亮、点击切换分区；进入子页面时随 Hub 一起被 Navigation 覆盖而隐藏。
  */
-interface TabDef {
-  index: number;
-  label: string;
-  color: string;
-}
 
 @Component
 export struct BottomTabBar {

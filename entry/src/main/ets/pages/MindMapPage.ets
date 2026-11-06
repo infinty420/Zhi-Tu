@@ -8,7 +8,7 @@ import { MindMap } from '../model/MindMap';
 import { MindNode, NodeLink } from '../model/MindNode';
 import { MindMapCanvas, MindMapCanvasController } from '../components/MindMapCanvas';
 import { AgentPanel } from '../components/AgentPanel';
-import { AIResult, AIResultFailure, TutorChunk, TutorMode, TutorRequest, TutorResponse } from '../services/AIService';
+import { AIResult, AIResultFailure, TutorChunk, TutorMode, TutorResponse } from '../services/AIService';
 import { MindMapStore } from '../services/MindMapStore';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { ContinueService } from '../services/ContinueService';

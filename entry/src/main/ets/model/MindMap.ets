@@ -2,8 +2,8 @@
  * 导图文档领域对象。
  * 含唯一 id/title/subject/book/layout/theme/updatedAt，结构校验（唯一根、无环、parentId 引用存在）。
  */
-import { DEFAULT_LAYOUT, DEFAULT_NODE_COLOR, DEFAULT_THEME, Layout, MasteryLevel, NodeShape, NodeType, TITLE_MAX_LEN, ValidationResult, failValidation, okValidation } from './Constants';
-import { MindNode, NodeImage, NodeLink, NodeRichContent, NodeRichMedia, NodeStyle, KeyPointItem, FormulaItem, FormulaVar, RichExampleItem, MisconceptionItem, ChineseContent, HistoryContent, HistoryEventItem, GeographyContent, GeoCoord, ChemistryContent, BiologyContent, BioHierarchyItem, PoliticsContent, EnglishContent, EnglishExampleItem, emptyNodeRichContent, emptyChineseContent, emptyHistoryContent, emptyGeographyContent, emptyChemistryContent, emptyBiologyContent, emptyPoliticsContent, emptyEnglishContent } from './MindNode';
+import { DEFAULT_NODE_COLOR, DEFAULT_THEME, Layout, MasteryLevel, NodeShape, NodeType, TITLE_MAX_LEN, ValidationResult, failValidation } from './Constants';
+import { MindNode, NodeImage, NodeLink, NodeRichContent, NodeRichMedia, NodeStyle, KeyPointItem, FormulaItem, FormulaVar, RichExampleItem, MisconceptionItem, ChineseContent, HistoryContent, HistoryEventItem, GeographyContent, GeoCoord, ChemistryContent, BiologyContent, BioHierarchyItem, PoliticsContent, EnglishContent, EnglishExampleItem, emptyNodeRichContent, emptyChineseContent, emptyChemistryContent } from './MindNode';
 
 /** JSON 序列化用的节点结构 */
 interface MindNodeJson {

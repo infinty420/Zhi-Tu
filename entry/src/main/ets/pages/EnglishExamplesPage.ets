@@ -10,7 +10,6 @@ import { AIServiceFactory } from '../services/AIServiceFactory';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { MindMapStore } from '../services/MindMapStore';
 import { VocabItem } from '../model/StudyModels';
-import { AppContextHolder } from '../utils/AppContext';
 import { Logger } from '../utils/Logger';
 
 @Component

@@ -37,6 +37,7 @@ import { ClassPage } from './ClassPage';
 import { SearchPage } from './SearchPage';
 import { PhotoQuizPage } from './PhotoQuizPage';
 import { NodePage } from './NodePage';
+import { Scene3DPage } from './Scene3DPage';
 
 @Entry
 @Component
@@ -135,6 +136,8 @@ struct Index {
       PhotoQuizPage()
     } else if (name === 'NodePage') {
       NodePage()
+    } else if (name === 'Scene3DPage') {
+      Scene3DPage()
     }
   }
 

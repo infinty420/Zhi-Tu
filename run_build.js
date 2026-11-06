@@ -9,8 +9,8 @@ const fs = require('fs');
 
 const DEV_NODE = 'C:/Program Files/Huawei/DevEco Studio/tools/node/node.exe';
 const WRAPPER = 'C:/Program Files/Huawei/DevEco Studio/tools/hvigor/bin/hvigorw.js';
-const PROJECT = 'C:/Users/infinty/DevEcoStudioProjects/ZhiTu';
-const LOG = 'C:/Users/infinty/DevEcoStudioProjects/ZhiTu/build_v20.log';
+const PROJECT = __dirname;
+const LOG = require('path').join(__dirname, 'build_3d.log');
 const args = ['assembleHap', '--mode', 'module', '-p', 'product=default', '--no-daemon'];
 
 const r = spawnSync(DEV_NODE, [WRAPPER, ...args], {

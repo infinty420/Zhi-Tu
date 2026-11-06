@@ -4,7 +4,6 @@
  * 引用不存在节点或与现结构冲突时跳过并报告原因，绝不静默丢弃。
  */
 import { Layout, ModelFailure, NodeShape, NodeType } from '../model/Constants';
-import { MindMap } from '../model/MindMap';
 import { MapPatchOp } from './AIService';
 import { AIResponseValidator } from './AIResponseValidator';
 import { MindMapStore } from './MindMapStore';

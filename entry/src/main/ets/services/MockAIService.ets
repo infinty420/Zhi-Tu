@@ -7,7 +7,7 @@ import { MindMap } from '../model/MindMap';
 import { MindNode } from '../model/MindNode';
 import { AIErrorCode, AIResult, AgentChatRequest, AgentChatResponse, AgentStreamChunk, AIService, ExampleItem, ExamplesRequest, ExamplesResponse, MapPatchOp, MindMapGenRequest, MindMapGenResponse, MindMapStreamChunk, QuizGradeRequest, QuizGradeResponse, QuizQuestion, QuizRequest, QuizResponse, RichContentGenRequest, RichContentGenResponse, SimilarQuizRequest, StreamHandler, TutorChunk, TutorRequest, TutorResponse, aiFailure, aiSuccess } from './AIService';
 import { AIResponseValidator } from './AIResponseValidator';
-import { NodeRichContent, NodeStyle, KeyPointItem, FormulaItem, RichExampleItem, MisconceptionItem, NodeLink, emptyNodeRichContent, emptyChineseContent, emptyHistoryContent, emptyGeographyContent, emptyBiologyContent, emptyEnglishContent, emptyChemistryContent, emptyPoliticsContent } from '../model/MindNode';
+import { NodeRichContent, NodeStyle, KeyPointItem, FormulaItem, RichExampleItem, MisconceptionItem, NodeLink, emptyNodeRichContent } from '../model/MindNode';
 import { matchExamTemplate } from '../model/ExamPointTemplates';
 
 interface MockNodeDef {

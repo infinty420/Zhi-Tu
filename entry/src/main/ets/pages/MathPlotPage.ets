@@ -7,7 +7,6 @@ import { ModelFailure } from '../model/Constants';
 import { FuncParser, FnOfX } from '../engine/FuncParser';
 import { GeoPoint, KeyPoint, MathCamera2D, MathPlotEngine } from '../engine/MathPlotEngine';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';
-import { Logger } from '../utils/Logger';
 
 interface CircleGeo {
   center: GeoPoint;

@@ -22,8 +22,6 @@ interface ParseExprResult {
 
 const MATH_FUNCS: string[] = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log', 'ln'];
 
-const TOKEN_RE: RegExp = /^([0-9]+(\.[0-9]+)?|[a-zA-Z]+|[+\-*/^(),.])/;
-
 export class FuncParser {
   /** 解析表达式，返回求值闭包 */
   static parseFuncY(expr: string): ModelResult<FnOfX> {

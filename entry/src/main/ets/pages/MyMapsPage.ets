@@ -10,7 +10,6 @@ import { DeepLinkRouter } from '../services/DeepLinkRouter';
 import { CloudService } from '../services/CloudService';
 import { AccountService } from '../services/AccountService';
 import { CloudMapMeta } from '../model/Account';
-import { Logger } from '../utils/Logger';
 
 @Component
 export struct MyMapsPage {
@@ -20,6 +19,8 @@ export struct MyMapsPage {
   // Wave 12：云端同步
   @State cloudList: CloudMapMeta[] = [];
   @State cloudBusy: boolean = false;
+  /** 学科过滤（3D 知识馆/深链携参进入时生效；空 = 全部学科） */
+  @State subjectFilter: string = '';
   private store: MindMapStore = MindMapStore.getInstance();
   private cloud: CloudService = CloudService.getInstance();
 
@@ -30,7 +31,10 @@ export struct MyMapsPage {
 
   private async refresh(): Promise<void> {
     await this.store.ensureInit();
-    this.summaries = this.store.list();
+    const all: MindMapSummary[] = this.store.list();
+    this.summaries = this.subjectFilter.length > 0
+      ? all.filter((m: MindMapSummary) => m.subject === this.subjectFilter)
+      : all;
   }
 
   private async openMap(id: string): Promise<void> {
@@ -138,10 +142,21 @@ export struct MyMapsPage {
             .onClick(() => {
               DeepLinkRouter.pop();
             })
-          Text('我的导图')
+          Text(this.subjectFilter.length > 0 ? `${this.subjectLabel(this.subjectFilter)}导图` : '我的导图')
             .fontSize(18)
             .fontWeight(FontWeight.Bold)
             .fontColor('#1a2333')
+          if (this.subjectFilter.length > 0) {
+            Button('全部学科')
+              .height(28)
+              .fontSize(12)
+              .backgroundColor('#f0f3f8')
+              .fontColor('#4a5468')
+              .onClick(() => {
+                this.subjectFilter = '';
+                this.refresh();
+              })
+          }
           Blank()
           Button('导入JSON')
             .height(32)
@@ -335,6 +350,23 @@ export struct MyMapsPage {
     }
     .hideTitleBar(true)
     .backgroundColor('#F7F9FC')
+    .onReady((context: NavDestinationContext) => {
+      // 深链/3D 知识馆携参进入：按学科过滤列表
+      try {
+        const info: NavPathInfo = context.pathInfo;
+        const raw: Object | undefined = info.param as Object | undefined;
+        if (raw) {
+          const rec: Record<string, Object> = raw as Record<string, Object>;
+          const s: Object | undefined = rec['subject'];
+          if (typeof s === 'string' && s.length > 0) {
+            this.subjectFilter = s;
+            this.refresh();
+          }
+        }
+      } catch (err) {
+        // 参数异常时不影响默认列表
+      }
+    })
   }
 
   private subjectLabel(code: string): string {

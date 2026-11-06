@@ -4,7 +4,7 @@
  * 结构与 Templates.ets 一致：MarketItem 元信息 + 按需 build 出合法 MindMap。
  */
 
-import { Layout, NodeType } from './Constants';
+import { NodeType } from './Constants';
 import { MindMap } from './MindMap';
 import { MindNode } from './MindNode';
 import { GenUid } from '../utils/GenUid';

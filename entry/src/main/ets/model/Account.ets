@@ -44,13 +44,6 @@ export function accountRoleLabel(role: AccountRole): string {
   return '学生';
 }
 
-/** 同步状态 */
-export enum SyncState {
-  LOCAL = 'local',
-  SYNCING = 'syncing',
-  SYNCED = 'synced'
-}
-
 /** 云端导图元信息（Mock 云端） */
 export interface CloudMapMeta {
   id: string;

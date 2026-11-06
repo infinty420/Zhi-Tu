@@ -4,7 +4,7 @@
  * 未配置密钥或首次失败（retryable）时自动降级 Mock，业务层不感知实现差异。
  */
 import { AIConfig } from './AIConfig';
-import { AIErrorCode, AIResult, AIResultFailure, AgentChatRequest, AgentChatResponse, AgentStreamChunk, AIService, ExamplesRequest, ExamplesResponse, MindMapGenRequest, MindMapGenResponse, MindMapStreamChunk, QuizGradeRequest, QuizGradeResponse, QuizRequest, QuizResponse, RichContentGenRequest, RichContentGenResponse, SimilarQuizRequest, StreamHandler, TutorChunk, TutorMode, TutorRequest, TutorResponse, aiSuccess } from './AIService';
+import { AIErrorCode, AIResult, AIResultFailure, AgentChatRequest, AgentChatResponse, AgentStreamChunk, AIService, ExamplesRequest, ExamplesResponse, MindMapGenRequest, MindMapGenResponse, MindMapStreamChunk, QuizGradeRequest, QuizGradeResponse, QuizRequest, QuizResponse, RichContentGenRequest, RichContentGenResponse, SimilarQuizRequest, StreamHandler, TutorChunk, TutorRequest, TutorResponse, aiSuccess } from './AIService';
 import { MockAIService } from './MockAIService';
 import { OpenAICompatAIService } from './OpenAICompatAIService';
 import { AICacheService } from './AICacheService';

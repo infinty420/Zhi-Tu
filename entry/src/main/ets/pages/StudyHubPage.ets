@@ -4,7 +4,6 @@
  */
 import { promptAction } from '@kit.ArkUI';
 import { MindMapStore } from '../services/MindMapStore';
-import { StudyInsightService } from '../services/StudyInsightService';
 import { ReviewSummaryService, DueItem } from '../services/ReviewSummaryService';
 import { StudyPlanService, PlanDay, PlanTask } from '../services/StudyPlanService';
 import { DeepLinkRouter } from '../services/DeepLinkRouter';

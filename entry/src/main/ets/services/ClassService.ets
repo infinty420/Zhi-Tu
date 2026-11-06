@@ -7,7 +7,7 @@ import { preferences } from '@kit.ArkData';
 import { AppContextHolder } from '../utils/AppContext';
 import { GenUid } from '../utils/GenUid';
 import { Logger } from '../utils/Logger';
-import { Assignment, ClassInsight, ClassRoom, Student } from '../model/ClassModels';
+import { ClassInsight, ClassRoom } from '../model/ClassModels';
 
 const PREF_NAME = 'zhitu_class';
 const KEY_LIST = 'zhitu_class_list';

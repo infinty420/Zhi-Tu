@@ -3,7 +3,6 @@
  * 折叠抽屉 + 输入框 + 流式打字气泡 + 「气泡 + 应用结果摘要」；
  * 请求携带当前导图 JSON + 对话历史；patch 经 PatchApplier 增量应用并汇报未生效项。
  */
-import { promptAction } from '@kit.ArkUI';
 import { MindMap } from '../model/MindMap';
 import { AgentMessage, AIResultFailure } from '../services/AIService';
 import { AIConfig } from '../services/AIConfig';

@@ -10,6 +10,7 @@ import { StudyInsightService } from '../services/StudyInsightService';
 import { ACCOUNT_ROLES, AVATAR_CHOICES, AccountRole, accountRoleLabel } from '../model/Account';
 import { CloudMapMeta } from '../model/Account';
 import { MasteryLevel, ModelFailure, SUBJECTS, SubjectItem } from '../model/Constants';
+import { AvatarPhoto } from '../utils/AvatarPhoto';
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
@@ -114,6 +115,16 @@ export struct AccountPage {
     }
   }
 
+  /** 从系统相册选择一张照片作为头像（免权限；复制进沙箱持久保存） */
+  private async pickAvatarFromGallery(): Promise<void> {
+    const uri = await AvatarPhoto.pick();
+    if (uri.length === 0) {
+      return;
+    }
+    this.avatar = uri;
+    promptAction.showToast({ message: '已使用相册照片，记得保存学习画像' });
+  }
+
   private async doUpload(): Promise<void> {
     const snap = MindMapStore.getInstance().currentSnapshot();
     if (!snap) {
@@ -153,8 +164,16 @@ export struct AccountPage {
       Column({ space: 14 }) {
         if (this.loggedIn) {
           Row({ space: 12 }) {
-            Text(this.avatar)
-              .fontSize(36)
+            if (AvatarPhoto.isPhoto(this.avatar)) {
+              Image(this.avatar)
+                .width(44)
+                .height(44)
+                .borderRadius(22)
+                .objectFit(ImageFit.Cover)
+            } else {
+              Text(this.avatar)
+                .fontSize(36)
+            }
             Column({ space: 4 }) {
               Text(this.accountName)
                 .fontSize(18)
@@ -224,6 +243,27 @@ export struct AccountPage {
                     this.avatar = a;
                   })
               }, (a: string) => a)
+              // 相册照片头像（当前选中时展示缩略图）
+              if (AvatarPhoto.isPhoto(this.avatar)) {
+                Image(this.avatar)
+                  .width(36)
+                  .height(36)
+                  .borderRadius(8)
+                  .objectFit(ImageFit.Cover)
+                  .border({ width: 2, color: '#1677ff' })
+                  .margin({ right: 6, bottom: 4 })
+              }
+              // 相册选图入口
+              Text('📷 相册')
+                .fontSize(14)
+                .fontColor(AvatarPhoto.isPhoto(this.avatar) ? '#1677ff' : '#4a5468')
+                .padding({ left: 8, right: 8, top: 6, bottom: 6 })
+                .borderRadius(8)
+                .backgroundColor(AvatarPhoto.isPhoto(this.avatar) ? '#e6f4ff' : '#f0f3f8')
+                .margin({ right: 6, bottom: 4 })
+                .onClick(() => {
+                  this.pickAvatarFromGallery();
+                })
             }
             .width('100%')
 

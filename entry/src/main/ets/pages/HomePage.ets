@@ -260,6 +260,9 @@ export struct HomePage {
             this.iconCard('拍照识题', '拍下题目，秒出导图', '摄', '#0f6e56', '#e1f5ee', () => {
               DeepLinkRouter.push('PhotoQuizPage');
             })
+            this.iconCard('3D 智图舱', '原生 3D 渲染 · 120Hz', '3', '#4a3db8', '#e8e6fa', () => {
+              DeepLinkRouter.push('Scene3DPage');
+            })
           }
           .padding(16)
           .backgroundColor($r('app.color.zhitu_bg_card'))

@@ -1,23 +1,7 @@
 {
   "allowToBackupRestore": true,
   "includes": [
-    {
-      "name": "preferences",
-      "path": "/data/storage/el2/base/preferences",
-      "type": "file",
-      "encryption": false,
-      "matches": [
-        "*"
-      ]
-    },
-    {
-      "name": "rdb",
-      "path": "/data/storage/el2/base/rdb",
-      "type": "file",
-      "encryption": false,
-      "matches": [
-        "*"
-      ]
-    }
+    "/data/storage/el2/base/preferences/*",
+    "/data/storage/el2/base/rdb/*"
   ]
 }
